@@ -1,4 +1,5 @@
-import { Check, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Check, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 
 const PLAN_FEATURES = [
   "Full LinkedIn profile optimization",
@@ -9,7 +10,66 @@ const PLAN_FEATURES = [
   "Tied to your account — use it whenever you update your profile",
 ];
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://careercraft-backend.careercraft-backend.workers.dev";
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TdTHN9NSYSvt8H";
+
 export default function Pricing() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [paidSuccess, setPaidSuccess] = useState(false);
+
+  const handleCheckout = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const resp = await fetch(`${BACKEND_URL}/create-order`, {
+        method: "POST",
+      });
+
+      if (!resp.ok) {
+        throw new Error("Unable to initiate order. Please try again.");
+      }
+
+      const order = await resp.json();
+
+      if (!window.Razorpay) {
+        throw new Error("Razorpay SDK is not loaded. Please refresh the page.");
+      }
+
+      const options = {
+        key: RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: "CareerCraft",
+        description: "CareerCraft Full Access — One-time (₹199)",
+        order_id: order.id,
+        handler: function () {
+          setPaidSuccess(true);
+          setLoading(false);
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+          },
+        },
+        theme: {
+          color: "#FBBF24",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function (response) {
+        setError(response.error?.description || "Payment failed. Please try again.");
+        setLoading(false);
+      });
+      rzp.open();
+    } catch (err) {
+      setError(err.message || "Failed to start checkout");
+      setLoading(false);
+    }
+  };
+
   return (
     <section id="pricing" className="border-t-2 border-ink bg-surface">
       <div className="mx-auto max-w-md px-5 py-20">
@@ -17,7 +77,7 @@ export default function Pricing() {
           One plan. One-time fee.
         </h2>
         <p className="mx-auto mt-3 max-w-sm text-center text-sm text-ink-muted">
-          No subscription. Sign in, pay once, optimize your LinkedIn.
+          No subscription. Pay once, optimize your LinkedIn.
         </p>
 
         <div className="mt-10 flex flex-col rounded-2xl border-2 border-ink bg-white p-8 shadow-[8px_8px_0_#111111]">
@@ -43,13 +103,44 @@ export default function Pricing() {
             ))}
           </ul>
 
-          <a
-            href="#"
-            className="mt-8 inline-flex items-center justify-center gap-2 rounded-lg border-2 border-ink bg-brand px-5 py-3 text-sm font-bold uppercase tracking-wide text-ink shadow-[4px_4px_0_#111111] transition-transform hover:-translate-y-0.5"
-          >
-            Sign In &amp; Pay ₹199
-            <ArrowRight size={16} />
-          </a>
+          {paidSuccess ? (
+            <div className="mt-8 rounded-lg border-2 border-green-600 bg-green-50 p-4 text-center text-green-900">
+              <div className="flex items-center justify-center gap-2 font-bold text-green-800">
+                <CheckCircle2 size={20} />
+                Payment Successful!
+              </div>
+              <p className="mt-2 text-xs text-green-700">
+                Your license key is being generated and delivered to your email. Check your inbox and enter it into the CareerCraft Chrome extension to activate.
+              </p>
+            </div>
+          ) : (
+            <>
+              {error && (
+                <p className="mt-4 rounded border border-red-300 bg-red-50 p-2 text-center text-xs font-medium text-red-700">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleCheckout}
+                disabled={loading}
+                className="mt-8 inline-flex items-center justify-center gap-2 rounded-lg border-2 border-ink bg-brand px-5 py-3 text-sm font-bold uppercase tracking-wide text-ink shadow-[4px_4px_0_#111111] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Opening Checkout...
+                  </>
+                ) : (
+                  <>
+                    Get Access &amp; Pay ₹199
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
+            </>
+          )}
 
           <p className="mt-4 text-center text-xs text-ink-muted">
             CareerCraft reads your LinkedIn profile via a browser

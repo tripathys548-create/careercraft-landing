@@ -11,28 +11,28 @@ or admin auth in `backend/` — those were reviewed and are correct
 as-is. Don't let Antigravity "improve" them without a specific reason.
 
 ## 1. Provision real accounts and secrets
-- [ ] Create a Neon Postgres database, run `backend/db/schema.sql` against it.
-- [ ] Create a Cloudflare account, `wrangler login`.
-- [ ] Create a Razorpay account (test mode first), get `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`.
-- [ ] Pick an LLM provider (Gemini Flash / GPT-4o-mini class) and get an API key.
-- [ ] Pick a transactional email provider (Resend/Brevo) and get an API key.
-- [ ] Choose an `ADMIN_PASSWORD`.
+- [x] Create a Neon Postgres database, run `backend/db/schema.sql` against it.
+- [x] Create a Cloudflare account, `wrangler login`.
+- [x] Create a Razorpay account (test mode first), get `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`.
+- [x] Pick an LLM provider (Gemini Flash / GPT-4o-mini class) and get an API key.
+- [x] Pick a transactional email provider (Resend/Brevo) and get an API key.
+- [x] Choose an `ADMIN_PASSWORD`.
 - **Comment for Antigravity:** none of this is a coding task — these are accounts only you can create.
 
 ## 2. Deploy the backend
-- [ ] `wrangler secret put` for all 9 secrets listed in `README.md`.
-- [ ] `npx wrangler deploy` from `backend/`.
-- [ ] Register a Razorpay webhook pointing at `<deployed-url>/payment-webhook`; set its signing secret as `RAZORPAY_WEBHOOK_SECRET`.
+- [x] `wrangler secret put` for all 9 secrets listed in `README.md`.
+- [x] `npx wrangler deploy` from `backend/`.
+- [x] Register a Razorpay webhook pointing at `<deployed-url>/payment-webhook`; set its signing secret as `RAZORPAY_WEBHOOK_SECRET`.
 
 ## 3. Deploy the landing page and wire it up
-- [ ] Deploy the landing page (`npm run build`, host the output — Cloudflare Pages, Netlify, etc.).
-- [ ] Set that origin as `CHECKOUT_ORIGIN` secret on the backend.
-- [ ] Wire `src/components/Pricing.jsx`'s "Sign In & Pay ₹199" button to actually call `POST /create-order` and open Razorpay Checkout — right now it's a dead `href="#"`. There's no real "sign in" step in the backend yet (see item 6); until that exists, this can go straight to payment like the original product did, keyed to email collected at checkout.
+- [x] Deploy the landing page (`npm run build`, host the output — Cloudflare Pages, Netlify, etc.).
+- [x] Set that origin as `CHECKOUT_ORIGIN` secret on the backend.
+- [x] Wire `src/components/Pricing.jsx`'s "Sign In & Pay ₹199" button to actually call `POST /create-order` and open Razorpay Checkout — right now it's a dead `href="#"`. There's no real "sign in" step in the backend yet (see item 6); until that exists, this can go straight to payment like the original product did, keyed to email collected at checkout.
 - [ ] Wire `src/components/TransformDemo.jsx`'s real (post-purchase) path once a license key exists — keep the current canned-example behavior for anyone who hasn't paid; that framing is intentional, not a placeholder to remove.
 
 ## 4. Wire up the extension
-- [ ] Set `BACKEND_URL` in `extension/src/background/background.js` to the deployed Workers URL.
-- [ ] Set the real checkout URL in `extension/src/popup/popup.html`'s "Purchase here" link.
+- [x] Set `BACKEND_URL` in `extension/src/background/background.js` to the deployed Workers URL.
+- [x] Set the real checkout URL in `extension/src/popup/popup.html`'s "Purchase here" link.
 - [ ] Load unpacked in Chrome and test end-to-end against the deployed backend before publishing to the Chrome Web Store.
 
 ## 5. Missing pieces, not yet built

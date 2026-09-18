@@ -2,7 +2,7 @@ import type { Env } from './db';
 
 export async function callLLM(env: Env, systemPrompt: string, userContent: string): Promise<string> {
   const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.LLM_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${env.LLM_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
