@@ -11,7 +11,7 @@ const PLAN_FEATURES = [
 ];
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://careercraft-backend.careercraft-backend.workers.dev";
-const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TdaVW6CqNv6GnT";
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_live_Tdb1rjpNchUkcj";
 
 export default function Pricing() {
   const [paymentMode, setPaymentMode] = useState("online"); // 'online' | 'qr'
