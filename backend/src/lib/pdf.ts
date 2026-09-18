@@ -192,7 +192,6 @@ export async function renderResumePdf(data: ResumeData, template: TemplateName =
     section('Skills');
     flow.paragraph(data.skills.join('   •   '), bodySize, bodyFont, BLACK, lineGap);
   }
-  }
 
   return doc.save();
 }
