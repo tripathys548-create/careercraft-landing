@@ -23,8 +23,17 @@ const BACKEND_URL =
 
 const ADMIN_EMAIL = "Support.websitecreation@gmail.com";
 
+function getInitialAdminToken() {
+  try {
+    if (typeof window !== "undefined" && window.sessionStorage) {
+      return sessionStorage.getItem("careercraft_admin_token") || "";
+    }
+  } catch {}
+  return "";
+}
+
 export default function AdminModal({ isOpen, onClose }) {
-  const [token, setToken] = useState(() => sessionStorage.getItem("careercraft_admin_token") || "");
+  const [token, setToken] = useState(getInitialAdminToken);
   const [adminEmail, setAdminEmail] = useState(ADMIN_EMAIL);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState("users"); // "users" | "keys" | "generate" | "messages"

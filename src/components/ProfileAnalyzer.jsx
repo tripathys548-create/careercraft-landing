@@ -342,7 +342,7 @@ export default function ProfileAnalyzer() {
             <div className="mt-6 border-b-2 border-ink/10 pb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Linkedin size={16} className="text-blue-700" />
+                  <LinkedinIcon size={16} className="text-blue-700" />
                   <span className="text-xs font-bold uppercase tracking-wide text-ink">
                     2. Your LinkedIn Profile
                   </span>

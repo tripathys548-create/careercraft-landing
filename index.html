@@ -49,8 +49,10 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   </head>
   <body>
-    <div id="root">
-      <!-- Static Raw Content for Search Crawlers and View Source -->
+    <div id="root"></div>
+
+    <!-- Pre-rendered Static Content for Search Crawlers and View Source -->
+    <noscript>
       <header>
         <nav>
           <a href="/">CareerCraft</a>
@@ -58,6 +60,7 @@
           <a href="#features">Features</a>
           <a href="#templates">Templates</a>
           <a href="#pricing">Pricing</a>
+          <a href="#optimize">Optimize</a>
         </nav>
       </header>
 
@@ -104,7 +107,8 @@
           </div>
         </section>
       </main>
-    </div>
+    </noscript>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
