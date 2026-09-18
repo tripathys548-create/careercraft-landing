@@ -7,6 +7,7 @@ export interface ResumeData {
   experience: string[];
   education: string[];
   skills: string[];
+  template?: 'classic' | 'modern' | 'compact';
 }
 
 export type TemplateName = 'modern' | 'classic' | 'compact';
@@ -121,7 +122,8 @@ class FlowingDoc {
 }
 
 export async function renderResumePdf(data: ResumeData, template: TemplateName = 'modern'): Promise<Uint8Array> {
-  const cfg = TEMPLATES[template] ?? TEMPLATES.modern;
+  const chosenTemplate = (data.template as TemplateName) || template;
+  const cfg = TEMPLATES[chosenTemplate] ?? TEMPLATES.modern;
   const doc = await PDFDocument.create();
 
   const fonts = {
@@ -189,6 +191,7 @@ export async function renderResumePdf(data: ResumeData, template: TemplateName =
   if (data.skills.length > 0) {
     section('Skills');
     flow.paragraph(data.skills.join('   •   '), bodySize, bodyFont, BLACK, lineGap);
+  }
   }
 
   return doc.save();

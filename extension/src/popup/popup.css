@@ -269,8 +269,148 @@ a:hover {
   color: var(--color-accent-hover);
 }
 
+/* Health Score Card */
+.health-card {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.health-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.health-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #334155;
+}
+
+.badge-good {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.badge-warn {
+  background: #fef9c3;
+  color: #a16207;
+  border: 1px solid #fde047;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.score-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.metric-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.metric-label {
+  width: 105px;
+  color: #475569;
+  flex-shrink: 0;
+}
+
+.progress-container {
+  flex: 1;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #10b981;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.metric-val {
+  font-family: monospace;
+  font-size: 10px;
+  color: #334155;
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Group labels & Segmented controls */
+.group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.group-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.segmented-control {
+  display: flex;
+  background: #e2e8f0;
+  padding: 2px;
+  border-radius: 4px;
+  gap: 2px;
+}
+
+.segment-btn {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.segment-btn.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.score-compare-box {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
 footer {
   border-top: 1px solid var(--color-border);
   padding-top: 10px;
   margin-top: 4px;
 }
+

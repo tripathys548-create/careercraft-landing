@@ -1,5 +1,6 @@
 import { ArrowRight, PlayCircle, Check } from "lucide-react";
 import HeroVisual from "./HeroVisual";
+import HeadlineOptimizerTeaser from "./HeadlineOptimizerTeaser";
 
 export default function Hero() {
   return (
@@ -43,14 +44,12 @@ export default function Hero() {
           <Check size={14} className="text-accent-green" /> ATS-friendly resume
         </li>
         <li className="flex items-center gap-1.5">
-          <Check size={14} className="text-accent-green" /> Cancel anytime
+          <Check size={14} className="text-accent-green" /> ₹199 One-Time Access
         </li>
       </ul>
 
-      <p className="mx-auto mt-6 max-w-md text-sm text-ink-muted">
-        Built for job seekers whose profiles are doing less work than they
-        should.
-      </p>
+      {/* Interactive Headline Optimizer Teaser */}
+      <HeadlineOptimizerTeaser />
 
       <HeroVisual />
     </section>

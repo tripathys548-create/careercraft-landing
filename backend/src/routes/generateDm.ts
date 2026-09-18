@@ -15,6 +15,7 @@ export async function handleGenerateDm(request: Request, env: Env): Promise<Resp
     viewerStack: string;
     targetName: string;
     targetHeadline: string;
+    persona?: 'hiring_manager' | 'recruiter' | 'peer';
   }>();
 
   const sql = getDb(env);
@@ -34,7 +35,13 @@ export async function handleGenerateDm(request: Request, env: Env): Promise<Resp
     });
   }
 
-  const userContent = `My stack: ${body.viewerStack}\nTarget name: ${body.targetName}\nTarget headline: ${body.targetHeadline}`;
+  const personaInstructions = {
+    hiring_manager: 'Target is a Hiring Manager / Team Lead. Focus on problem-solving, technical depth, and direct value proposition.',
+    recruiter: 'Target is an HR / Talent Recruiter. Focus on exact skill/keyword match, experience level, and clear interview availability.',
+    peer: 'Target is an Alumni / Peer. Use a warm, collaborative tone, common-ground hook, and a low-pressure ask for advice or internal referral.',
+  }[body.persona ?? 'hiring_manager'];
+
+  const userContent = `Persona style: ${personaInstructions}\nMy stack: ${body.viewerStack}\nTarget name: ${body.targetName}\nTarget headline: ${body.targetHeadline}`;
   let result: any;
   try {
     result = await callLLMJson(env, SYSTEM_PROMPT, userContent);

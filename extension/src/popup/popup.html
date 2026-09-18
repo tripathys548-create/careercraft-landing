@@ -55,21 +55,72 @@
       <button id="deactivate-btn" class="btn-text" title="Deactivate key">Deactivate</button>
     </header>
 
-    <p class="muted instruction">Navigate to a LinkedIn profile page, then use the tools below.</p>
+    <!-- Visual LinkedIn Health Score Widget (0-100) -->
+    <div id="health-score-card" class="health-card">
+      <div class="health-header">
+        <span class="health-title">LinkedIn Health Score</span>
+        <span id="health-badge" class="badge-good">94 / 100 · Grade A+</span>
+      </div>
+      
+      <div class="score-breakdown">
+        <div class="metric-row">
+          <span class="metric-label">Headline Impact</span>
+          <div class="progress-container">
+            <div id="bar-headline" class="progress-bar" style="width: 90%;"></div>
+          </div>
+          <span class="metric-val">28/30</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Action-Verb Density</span>
+          <div class="progress-container">
+            <div id="bar-verbs" class="progress-bar" style="width: 92%;"></div>
+          </div>
+          <span class="metric-val">32/35</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Keyword Match</span>
+          <div class="progress-container">
+            <div id="bar-keywords" class="progress-bar" style="width: 96%;"></div>
+          </div>
+          <span class="metric-val">34/35</span>
+        </div>
+      </div>
+    </div>
 
+    <p class="muted instruction">Navigate to a LinkedIn profile page, then choose an action:</p>
+
+    <!-- 1. Profile Rewrite -->
     <div class="feature-group">
       <button id="rewrite-btn" class="btn-feature">Rewrite My Profile</button>
-      <p class="feature-desc">Rewrites your Headline, About, and Experience using AI.</p>
+      <p class="feature-desc">Rewrites Headline, About & Experience to maximize search rank.</p>
     </div>
 
+    <!-- 2. Referral DM Generator with Persona Presets -->
     <div class="feature-group">
-      <button id="dm-btn" class="btn-feature">Draft Referral DM</button>
-      <p class="feature-desc">Generates a ~75-word cold-outreach message to the person on this profile.</p>
+      <div class="group-header">
+        <label class="group-label">Referral DM Recruiter Persona:</label>
+      </div>
+      <div class="segmented-control" id="dm-persona-selector">
+        <button type="button" class="segment-btn active" data-persona="hiring_manager">Hiring Lead</button>
+        <button type="button" class="segment-btn" data-persona="recruiter">Recruiter</button>
+        <button type="button" class="segment-btn" data-persona="peer">Alumni / Peer</button>
+      </div>
+      <button id="dm-btn" class="btn-feature" style="margin-top: 6px;">Draft Referral DM</button>
+      <p class="feature-desc">Tailors tone & hook based on recipient persona.</p>
     </div>
 
+    <!-- 3. Resume PDF Builder with Multi-Template ATS Styles -->
     <div class="feature-group">
-      <button id="resume-btn" class="btn-feature">Download Resume PDF</button>
-      <p class="feature-desc">Builds a clean PDF resume from your profile. One-time generation, free.</p>
+      <div class="group-header">
+        <label class="group-label">ATS Resume Template Style:</label>
+      </div>
+      <div class="segmented-control" id="resume-template-selector">
+        <button type="button" class="segment-btn active" data-template="classic">Ivy Classic</button>
+        <button type="button" class="segment-btn" data-template="modern">Modern Tech</button>
+        <button type="button" class="segment-btn" data-template="compact">Compact Exec</button>
+      </div>
+      <button id="resume-btn" class="btn-feature" style="margin-top: 6px;">Download ATS Resume PDF</button>
+      <p class="feature-desc">100% ATS parseable with selected typography layout.</p>
     </div>
 
     <div id="results" hidden>

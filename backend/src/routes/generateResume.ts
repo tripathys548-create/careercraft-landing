@@ -19,8 +19,7 @@ export async function handleGenerateResume(request: Request, env: Env): Promise<
     about?: string;
     experience?: string;
     education?: string;
-    skills?: string;
-    template?: string;
+    template?: 'classic' | 'modern' | 'compact' | string;
   }>();
 
   const sql = getDb(env);
@@ -74,6 +73,7 @@ export async function handleGenerateResume(request: Request, env: Env): Promise<
       experience: structured.experience,
       education: structured.education,
       skills: structured.skills,
+      template,
     },
     template
   );
