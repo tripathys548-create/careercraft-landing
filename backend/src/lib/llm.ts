@@ -14,6 +14,8 @@ export async function callLLM(env: Env, systemPrompt: string, userContent: strin
     }
   );
   if (!resp.ok) {
+    const errBody = await resp.text().catch(() => '<no body>');
+    console.error(`[llm] call failed: status=${resp.status} body=${errBody}`);
     throw new Error(`llm call failed: ${resp.status}`);
   }
   const data = await resp.json<any>();
