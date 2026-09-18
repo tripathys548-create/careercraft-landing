@@ -11,42 +11,78 @@ const PLAN_FEATURES = [
 ];
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://careercraft-backend.careercraft-backend.workers.dev";
-const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TdTHN9NSYSvt8H";
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TdaVW6CqNv6GnT";
 
 export default function Pricing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [paidSuccess, setPaidSuccess] = useState(false);
+  const [licenseKey, setLicenseKey] = useState(null);
 
   const handleCheckout = async () => {
     setLoading(true);
     setError(null);
 
     try {
+      // 1. Call Backend to Create Razorpay Order
       const resp = await fetch(`${BACKEND_URL}/create-order`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: 19900, currency: "INR" }),
       });
 
       if (!resp.ok) {
-        throw new Error("Unable to initiate order. Please try again.");
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.message || "Unable to initiate order. Please try again.");
       }
 
       const order = await resp.json();
+      const orderId = order.order_id || order.id;
+
+      if (!orderId) {
+        throw new Error("Invalid order received from server.");
+      }
 
       if (!window.Razorpay) {
         throw new Error("Razorpay SDK is not loaded. Please refresh the page.");
       }
 
+      // 2. Open Razorpay Standard Checkout Modal
       const options = {
         key: RAZORPAY_KEY_ID,
-        amount: order.amount,
-        currency: order.currency,
+        amount: order.amount || 19900,
+        currency: order.currency || "INR",
         name: "CareerCraft",
         description: "CareerCraft Full Access — One-time (₹199)",
-        order_id: order.id,
-        handler: function () {
-          setPaidSuccess(true);
-          setLoading(false);
+        order_id: orderId,
+        handler: async function (response) {
+          setLoading(true);
+          try {
+            // 3. Call Backend to Verify Payment Signature
+            const verifyResp = await fetch(`${BACKEND_URL}/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+
+            const verifyData = await verifyResp.json().catch(() => ({}));
+            if (!verifyResp.ok || !verifyData.ok) {
+              throw new Error(verifyData.message || "Payment signature verification failed.");
+            }
+
+            if (verifyData.license_key) {
+              setLicenseKey(verifyData.license_key);
+            }
+            setPaidSuccess(true);
+          } catch (verifyErr) {
+            setError(verifyErr.message || "Payment verification failed. Please contact support.");
+          } finally {
+            setLoading(false);
+          }
         },
         modal: {
           ondismiss: function () {
@@ -107,16 +143,22 @@ export default function Pricing() {
             <div className="mt-8 rounded-lg border-2 border-green-600 bg-green-50 p-4 text-center text-green-900">
               <div className="flex items-center justify-center gap-2 font-bold text-green-800">
                 <CheckCircle2 size={20} />
-                Payment Successful!
+                Payment Successful &amp; Verified!
               </div>
-              <p className="mt-2 text-xs text-green-700">
-                Your license key is being generated and delivered to your email.
-              </p>
+              {licenseKey ? (
+                <div className="mt-3 rounded border border-green-300 bg-white p-2.5 text-xs font-mono font-bold text-ink">
+                  License Key: {licenseKey}
+                </div>
+              ) : (
+                <p className="mt-2 text-xs text-green-700">
+                  Your payment was verified. Your license key is being delivered to your email.
+                </p>
+              )}
               <a
                 href="#optimize"
                 className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border-2 border-ink bg-brand px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-ink shadow-[3px_3px_0_#111111]"
               >
-                Enter your key & analyze your profile
+                Enter your key &amp; analyze your profile
                 <ArrowRight size={16} />
               </a>
             </div>

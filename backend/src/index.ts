@@ -1,5 +1,6 @@
 import type { Env } from './lib/db';
 import { handleCreateOrder } from './routes/createOrder';
+import { handleVerifyPayment } from './routes/verifyPayment';
 import { handlePaymentWebhook } from './routes/paymentWebhook';
 import { handleValidateKey } from './routes/validateKeyRoute';
 import { handleRewriteProfile } from './routes/rewriteProfile';
@@ -13,8 +14,13 @@ type RouteHandler = (request: Request, env: Env) => Promise<Response>;
 
 const ROUTES: Record<string, RouteHandler> = {
   'POST /create-order': handleCreateOrder,
+  'POST /api/create-order': handleCreateOrder,
+  'POST /verify-payment': handleVerifyPayment,
+  'POST /api/verify-payment': handleVerifyPayment,
   'POST /payment-webhook': handlePaymentWebhook,
+  'POST /api/payment-webhook': handlePaymentWebhook,
   'POST /validate-key': handleValidateKey,
+  'POST /api/validate-key': handleValidateKey,
   'POST /rewrite-profile': handleRewriteProfile,
   'POST /analyze-profile': handleAnalyzeProfile,
   'POST /generate-dm': handleGenerateDm,
