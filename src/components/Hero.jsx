@@ -10,7 +10,6 @@ export default function Hero() {
 
       <h1 className="font-display mx-auto mt-4 max-w-2xl text-4xl font-bold leading-tight tracking-tight text-ink sm:text-5xl">
         Make recruiters stop at your LinkedIn
-        <span className="cursor-blink text-brand">|</span>
       </h1>
 
       <p className="mx-auto mt-5 max-w-xl text-base text-ink-muted sm:text-lg">
