@@ -3,6 +3,7 @@ import { handleCreateOrder } from './routes/createOrder';
 import { handlePaymentWebhook } from './routes/paymentWebhook';
 import { handleValidateKey } from './routes/validateKeyRoute';
 import { handleRewriteProfile } from './routes/rewriteProfile';
+import { handleAnalyzeProfile } from './routes/analyzeProfile';
 import { handleGenerateDm } from './routes/generateDm';
 import { handleGenerateResume } from './routes/generateResume';
 import { handleSupportMessage } from './routes/supportMessage';
@@ -15,6 +16,7 @@ const ROUTES: Record<string, RouteHandler> = {
   'POST /payment-webhook': handlePaymentWebhook,
   'POST /validate-key': handleValidateKey,
   'POST /rewrite-profile': handleRewriteProfile,
+  'POST /analyze-profile': handleAnalyzeProfile,
   'POST /generate-dm': handleGenerateDm,
   'POST /generate-resume': handleGenerateResume,
   'POST /support-message': handleSupportMessage,

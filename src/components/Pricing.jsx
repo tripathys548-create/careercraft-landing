@@ -110,8 +110,15 @@ export default function Pricing() {
                 Payment Successful!
               </div>
               <p className="mt-2 text-xs text-green-700">
-                Your license key is being generated and delivered to your email. Check your inbox and enter it into the CareerCraft Chrome extension to activate.
+                Your license key is being generated and delivered to your email.
               </p>
+              <a
+                href="#optimize"
+                className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border-2 border-ink bg-brand px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-ink shadow-[3px_3px_0_#111111]"
+              >
+                Enter your key & analyze your profile
+                <ArrowRight size={16} />
+              </a>
             </div>
           ) : (
             <>
