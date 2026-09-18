@@ -47,7 +47,14 @@ function corsPreflightResponse(origin: string): Response {
 // it here only ever helps local `wrangler dev` testing — it does not widen who
 // can call the API in production.
 function isAllowedOrigin(origin: string, env: Env): boolean {
-  return origin === env.EXTENSION_ORIGIN || origin === env.CHECKOUT_ORIGIN || /^http:\/\/localhost:\d+$/.test(origin);
+  return (
+    origin === env.EXTENSION_ORIGIN ||
+    origin === env.CHECKOUT_ORIGIN ||
+    origin === 'https://careercraftt.webelvate.com' ||
+    origin === 'https://careercraft.webelvate.com' ||
+    /^https?:\/\/([a-z0-9-]+\.)*webelvate\.com$/.test(origin) ||
+    /^http:\/\/localhost:\d+$/.test(origin)
+  );
 }
 
 export default {
