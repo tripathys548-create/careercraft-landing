@@ -8,7 +8,18 @@ import { handleAnalyzeProfile } from './routes/analyzeProfile';
 import { handleGenerateDm } from './routes/generateDm';
 import { handleGenerateResume } from './routes/generateResume';
 import { handleSupportMessage } from './routes/supportMessage';
-import { handleAdminMessages, handleAdminGenerations, handleAdminKeys } from './routes/admin';
+import { handleRegisterUser } from './routes/registerUser';
+import {
+  handleAdminMessages,
+  handleAdminGenerations,
+  handleAdminKeys,
+  handleAdminUsers,
+  handleAdminGenerateKey,
+  handleAdminResendKey,
+  handleAdminToggleKey,
+  handleAdminResolveMessage,
+  handleAdminMigrate,
+} from './routes/admin';
 
 type RouteHandler = (request: Request, env: Env) => Promise<Response>;
 
@@ -19,6 +30,8 @@ const ROUTES: Record<string, RouteHandler> = {
   'POST /api/verify-payment': handleVerifyPayment,
   'POST /payment-webhook': handlePaymentWebhook,
   'POST /api/payment-webhook': handlePaymentWebhook,
+  'POST /register-user': handleRegisterUser,
+  'POST /api/register-user': handleRegisterUser,
   'POST /validate-key': handleValidateKey,
   'POST /api/validate-key': handleValidateKey,
   'POST /rewrite-profile': handleRewriteProfile,
@@ -26,9 +39,16 @@ const ROUTES: Record<string, RouteHandler> = {
   'POST /generate-dm': handleGenerateDm,
   'POST /generate-resume': handleGenerateResume,
   'POST /support-message': handleSupportMessage,
+  'POST /api/support-message': handleSupportMessage,
+  'GET /admin/users': handleAdminUsers,
+  'GET /admin/keys': handleAdminKeys,
   'GET /admin/messages': handleAdminMessages,
   'GET /admin/generations': handleAdminGenerations,
-  'GET /admin/keys': handleAdminKeys,
+  'POST /admin/generate-key': handleAdminGenerateKey,
+  'POST /admin/resend-key': handleAdminResendKey,
+  'POST /admin/toggle-key': handleAdminToggleKey,
+  'POST /admin/resolve-message': handleAdminResolveMessage,
+  'POST /admin/migrate': handleAdminMigrate,
 };
 
 function corsPreflightResponse(origin: string): Response {
@@ -36,16 +56,13 @@ function corsPreflightResponse(origin: string): Response {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Email',
       'Access-Control-Max-Age': '86400',
     },
   });
 }
 
-// A real user's browser can never send Origin: http://localhost:*, so allowing
-// it here only ever helps local `wrangler dev` testing — it does not widen who
-// can call the API in production.
 function isAllowedOrigin(origin: string, env: Env): boolean {
   return (
     origin === env.EXTENSION_ORIGIN ||

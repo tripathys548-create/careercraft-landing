@@ -28,6 +28,8 @@ export async function handleVerifyPayment(request: Request, env: Env): Promise<R
     payment_id?: string;
     signature?: string;
     email?: string;
+    name?: string;
+    mobile?: string;
   };
 
   try {
@@ -100,10 +102,37 @@ export async function handleVerifyPayment(request: Request, env: Env): Promise<R
         licenseKey = existing[0].key;
       } else {
         licenseKey = generateLicenseKey();
-        const userEmail = body.email || `customer_${paymentId.slice(-8)}@careercraft.com`;
-        await sql`INSERT INTO license_keys (key, email, razorpay_payment_id, status) VALUES (${licenseKey}, ${userEmail}, ${paymentId}, 'active') ON CONFLICT (key) DO NOTHING`;
+        const userEmail = (body.email || '').trim().toLowerCase() || `customer_${paymentId.slice(-8)}@careercraft.com`;
+        const userName = (body.name || '').trim();
+        const userMobile = (body.mobile || '').trim() || null;
+
+        // Upsert user if name and email exist
+        let userId: number | null = null;
+        if (body.email) {
+          try {
+            const userRows = await sql`
+              INSERT INTO users (name, email, mobile)
+              VALUES (${userName || 'Valued Candidate'}, ${userEmail}, ${userMobile})
+              ON CONFLICT (email)
+              DO UPDATE SET mobile = COALESCE(EXCLUDED.mobile, users.mobile)
+              RETURNING id
+            `;
+            if (userRows && userRows.length > 0) {
+              userId = userRows[0].id;
+            }
+          } catch (uErr) {
+            console.error('Failed to link user in verifyPayment:', uErr);
+          }
+        }
+
+        await sql`
+          INSERT INTO license_keys (key, email, mobile, user_id, razorpay_payment_id, status)
+          VALUES (${licenseKey}, ${userEmail}, ${userMobile}, ${userId}, ${paymentId}, 'active')
+          ON CONFLICT (key) DO NOTHING
+        `;
+
         if (body.email && env.EMAIL_API_KEY) {
-          await sendLicenseKeyEmail(env, body.email, licenseKey).catch((err) =>
+          await sendLicenseKeyEmail(env, userEmail, licenseKey).catch((err) =>
             console.error('Failed to send license key email:', err)
           );
         }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import TransformDemo from "./components/TransformDemo";
@@ -11,11 +12,19 @@ import Testimonials from "./components/Testimonials";
 import FAQ from "./components/FAQ";
 import FinalCTA from "./components/FinalCTA";
 import Footer from "./components/Footer";
+import SupportModal from "./components/SupportModal";
+import AdminModal from "./components/AdminModal";
 
 export default function App() {
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-cream">
-      <Header />
+      <Header
+        onOpenSupport={() => setSupportOpen(true)}
+        onOpenAdmin={() => setAdminOpen(true)}
+      />
       <main>
         <Hero />
         <TransformDemo />
@@ -29,7 +38,19 @@ export default function App() {
         <FAQ />
         <FinalCTA />
       </main>
-      <Footer />
+      <Footer
+        onOpenSupport={() => setSupportOpen(true)}
+        onOpenAdmin={() => setAdminOpen(true)}
+      />
+
+      <SupportModal
+        isOpen={supportOpen}
+        onClose={() => setSupportOpen(false)}
+      />
+      <AdminModal
+        isOpen={adminOpen}
+        onClose={() => setAdminOpen(false)}
+      />
     </div>
   );
 }

@@ -7,38 +7,44 @@ import { renderResumePdf, TemplateName } from '../lib/pdf';
 
 const VALID_TEMPLATES: TemplateName[] = ['modern', 'classic', 'compact'];
 
-const SYSTEM_PROMPT = `You are a LinkedIn profile grader and rewriter for Indian tech job seekers.
+const SYSTEM_PROMPT = `You are an elite Executive Career Strategist and ATS Resume & LinkedIn Optimization Architect.
 
-You will receive a LinkedIn profile either as separate fields (headline, about, experience,
-skills) or as one block of raw text pasted from a LinkedIn PDF export. If given raw text,
-first identify and separate the headline, the About section, experience entries, and skills
-from it as best you can before scoring.
+You will receive candidate career details, which may include their EXISTING RESUME, their LINKEDIN PROFILE (as separate fields or raw text), and an optional TARGET ROLE.
 
-Score the ORIGINAL profile from 0-100 using this rubric:
-- Headline (0-25): keyword strength for recruiter search, clarity, specificity
-- About section (0-25): a real hook, a narrative with substance, a call-to-action — not generic filler
-- Experience (0-30): action verbs, quantified results, ordering that leads with recruiter-relevant skills
-- Skills (0-20): relevance and specificity, not a generic laundry list
+When both Resume and LinkedIn details are provided, your job is to SYNTHESIZE and CROSS-POLLINATE both sources:
+- Extract quantifiable metrics, measurable business impacts, projects, and domain terms from the resume.
+- Harmonize with the candidate's personal branding and narrative on LinkedIn.
+- Align the output strongly towards the Target Role if specified.
 
-Then rewrite the headline, About section, experience bullets, and skills to maximize the same
-rubric, following these rules:
-- Headline: SEO-focused, under 220 characters
-- About: three short paragraphs (hook, journey, call-to-action)
-- Experience: each entry starts with an action verb and includes a metric
-- Skills: reordered so the most recruiter-relevant ones come first, trimmed to the strongest 8-12
+Score the ORIGINAL profile/resume from 0-100:
+- Headline / Title (0-25): keyword discovery strength, clarity, executive presence
+- About / Summary (0-25): strong hook, quantified substance, clear value proposition
+- Experience (0-30): action verbs, measurable metrics, high-impact business outcomes
+- Skills (0-20): strategic depth, keyword alignment with modern hiring standards
 
-Score the REWRITTEN profile 0-100 using the identical rubric.
+Then produce an optimized REWRITE maximizing the rubric:
+- Headline: High-converting, SEO-optimized title with high recruiter search discoverability (under 220 chars)
+- About: 3 punchy, compelling paragraphs (The Hook & Specialization, Key Career Achievements & Metrics, Strategic Value & Call-to-action)
+- Experience: High-impact accomplishment bullets starting with strong action verbs (Spearheaded, Directed, Engineered, Orchestrated, Optimized) and including concrete numbers/percentages/metrics
+- Skills: Curated list of the top 10-15 most in-demand, high-relevance skills
 
-Return ONLY JSON matching:
+Score the REWRITTEN version 0-100 on the same rubric.
+
+Return ONLY valid JSON matching this schema:
 {
   "beforeScore": number,
   "beforeBreakdown": {"headline": number, "about": number, "experience": number, "skills": number},
   "afterScore": number,
   "afterBreakdown": {"headline": number, "about": number, "experience": number, "skills": number},
   "improvements": string[],
-  "rewrite": {"headline": string, "about": string, "experience": string[], "skills": string[]}
+  "rewrite": {
+    "headline": string,
+    "about": string,
+    "experience": string[],
+    "skills": string[]
+  }
 }
-"improvements" should be 4-6 specific, concrete suggestions a person could act on immediately.`;
+"improvements" must be 4-6 specific, actionable, and concrete recommendations.`;
 
 interface AnalyzeRequestBody {
   key: string;
@@ -50,6 +56,8 @@ interface AnalyzeRequestBody {
   education?: string;
   skills?: string;
   rawText?: string;
+  resumeText?: string;
+  targetRole?: string;
   template?: string;
 }
 
@@ -90,7 +98,8 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
   }
 
   const hasStructuredInput = body.headline || body.about || body.experience || body.skills;
-  if (!hasStructuredInput && !body.rawText) {
+  const hasInput = hasStructuredInput || body.rawText || body.resumeText;
+  if (!hasInput) {
     return jsonResponse(origin, { ok: false, error: 'missing_profile_content' }, 400);
   }
 
@@ -107,14 +116,28 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
     return jsonResponse(origin, { ok: false, error: 'rate_limited' }, 429);
   }
 
-  const userContent = body.rawText
-    ? `Raw exported profile text:\n${body.rawText}`
-    : [
+  const sections: string[] = [];
+  if (body.targetRole) {
+    sections.push(`TARGET ROLE / ASPIRATION:\n${body.targetRole.trim()}`);
+  }
+  if (body.resumeText) {
+    sections.push(`=== EXISTING RESUME CONTENT ===\n${body.resumeText.trim()}`);
+  }
+  if (body.rawText) {
+    sections.push(`=== LINKEDIN PROFILE (RAW EXPORT / PASTED) ===\n${body.rawText.trim()}`);
+  } else if (hasStructuredInput) {
+    sections.push(
+      [
+        '=== LINKEDIN PROFILE SECTIONS ===',
         `Headline: ${body.headline ?? ''}`,
         `About: ${body.about ?? ''}`,
         `Experience: ${body.experience ?? ''}`,
         `Skills: ${body.skills ?? ''}`,
-      ].join('\n');
+      ].join('\n')
+    );
+  }
+
+  const userContent = sections.join('\n\n');
 
   let result: any;
   try {
@@ -141,7 +164,7 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
   await logUsage(sql, body.key, 'analyze-profile');
   await sql`INSERT INTO generated_content (key, endpoint, output_json) VALUES (${body.key}, 'analyze-profile', ${JSON.stringify(safeResult)})`;
 
-  // Best-effort resume PDF from the same rewrite — never fail the whole request over this.
+  // Best-effort resume PDF synthesized from the rewrite
   let resumePdfBase64: string | null = null;
   try {
     const template: TemplateName = VALID_TEMPLATES.includes(body.template as TemplateName)

@@ -19,6 +19,7 @@ export async function handleGenerateResume(request: Request, env: Env): Promise<
     about?: string;
     experience?: string;
     education?: string;
+    skills?: string;
     template?: 'classic' | 'modern' | 'compact' | string;
   }>();
 

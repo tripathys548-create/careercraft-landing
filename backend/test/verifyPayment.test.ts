@@ -30,7 +30,7 @@ describe('handleVerifyPayment route', () => {
 
     const res = await handleVerifyPayment(req, env);
     expect(res.status).toBe(400);
-    const data = await res.json();
+    const data = (await res.json()) as any;
     expect(data.ok).toBe(false);
     expect(data.error).toBe('missing_fields');
   });
@@ -48,7 +48,7 @@ describe('handleVerifyPayment route', () => {
 
     const res = await handleVerifyPayment(req, env);
     expect(res.status).toBe(400);
-    const data = await res.json();
+    const data = (await res.json()) as any;
     expect(data.ok).toBe(false);
     expect(data.error).toBe('invalid_signature');
   });
@@ -70,7 +70,7 @@ describe('handleVerifyPayment route', () => {
 
     const res = await handleVerifyPayment(req, env);
     expect(res.status).toBe(200);
-    const data = await res.json();
+    const data = (await res.json()) as any;
     expect(data.ok).toBe(true);
     expect(data.verified).toBe(true);
     expect(data.order_id).toBe(orderId);

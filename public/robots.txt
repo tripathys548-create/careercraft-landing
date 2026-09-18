@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://careercraftt.webelvate.com/sitemap.xml
