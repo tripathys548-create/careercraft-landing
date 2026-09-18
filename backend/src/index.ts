@@ -37,6 +37,13 @@ function corsPreflightResponse(origin: string): Response {
   });
 }
 
+// A real user's browser can never send Origin: http://localhost:*, so allowing
+// it here only ever helps local `wrangler dev` testing — it does not widen who
+// can call the API in production.
+function isAllowedOrigin(origin: string, env: Env): boolean {
+  return origin === env.EXTENSION_ORIGIN || origin === env.CHECKOUT_ORIGIN || /^http:\/\/localhost:\d+$/.test(origin);
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -44,7 +51,7 @@ export default {
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
       const origin = request.headers.get('Origin') ?? '';
-      if (origin === env.EXTENSION_ORIGIN || origin === env.CHECKOUT_ORIGIN) {
+      if (isAllowedOrigin(origin, env)) {
         return corsPreflightResponse(origin);
       }
       return new Response('forbidden', { status: 403 });

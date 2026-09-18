@@ -59,23 +59,35 @@ function deriveLinkedinId(url?: string): string | null {
   return match ? match[1] : null;
 }
 
-function jsonResponse(env: Env, body: unknown, status: number): Response {
+// A real user's browser can never send Origin: http://localhost:*, so echoing
+// it back here only ever helps local `wrangler dev` testing — it does not
+// widen who can read this response in production.
+function resolveOrigin(request: Request, env: Env): string {
+  const origin = request.headers.get('Origin') ?? '';
+  if (origin === env.CHECKOUT_ORIGIN || /^http:\/\/localhost:\d+$/.test(origin)) {
+    return origin;
+  }
+  return env.CHECKOUT_ORIGIN;
+}
+
+function jsonResponse(origin: string, body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': env.CHECKOUT_ORIGIN },
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': origin },
   });
 }
 
 export async function handleAnalyzeProfile(request: Request, env: Env): Promise<Response> {
+  const origin = resolveOrigin(request, env);
   const body = await request.json<AnalyzeRequestBody>();
 
   if (!body.key) {
-    return jsonResponse(env, { ok: false, error: 'missing_key' }, 400);
+    return jsonResponse(origin, { ok: false, error: 'missing_key' }, 400);
   }
 
   const hasStructuredInput = body.headline || body.about || body.experience || body.skills;
   if (!hasStructuredInput && !body.rawText) {
-    return jsonResponse(env, { ok: false, error: 'missing_profile_content' }, 400);
+    return jsonResponse(origin, { ok: false, error: 'missing_profile_content' }, 400);
   }
 
   const sql = getDb(env);
@@ -83,12 +95,12 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
 
   const validation = await validateAndBindKey(sql, body.key, linkedinId);
   if (!validation.ok) {
-    return jsonResponse(env, validation, 403);
+    return jsonResponse(origin, validation, 403);
   }
 
   const withinLimit = await checkRateLimit(sql, body.key);
   if (!withinLimit) {
-    return jsonResponse(env, { ok: false, error: 'rate_limited' }, 429);
+    return jsonResponse(origin, { ok: false, error: 'rate_limited' }, 429);
   }
 
   const userContent = body.rawText
@@ -104,7 +116,7 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
   try {
     result = await callLLMJson(env, SYSTEM_PROMPT, userContent);
   } catch {
-    return jsonResponse(env, { ok: false, error: 'generation_failed' }, 502);
+    return jsonResponse(origin, { ok: false, error: 'generation_failed' }, 502);
   }
 
   await logUsage(sql, body.key, 'analyze-profile');
@@ -137,5 +149,5 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
     console.error('[analyze-profile] resume generation failed:', err);
   }
 
-  return jsonResponse(env, { ok: true, ...result, resumePdfBase64 }, 200);
+  return jsonResponse(origin, { ok: true, ...result, resumePdfBase64 }, 200);
 }
