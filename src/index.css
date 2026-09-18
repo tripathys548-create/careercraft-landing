@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", var(--font-sans);
+
+  --color-ink: #111111;
+  --color-ink-muted: #5b5b5b;
+  --color-cream: #faf6ec;
+  --color-surface: #f2ede0;
+  --color-border: #111111;
+
+  --color-brand: #22c55e;
+  --color-brand-hover: #16a34a;
+  --color-brand-soft: #eafbf0;
+
+  --color-accent-purple: #7c3aed;
+  --color-accent-purple-soft: #f3effe;
+  --color-accent-blue: #2563eb;
+  --color-accent-green: #16a34a;
+  --color-accent-yellow: #f5b800;
+  --color-accent-pink: #f43f5e;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--tw-rotate, 0deg)); }
+  50% { transform: translateY(-8px) rotate(var(--tw-rotate, 0deg)); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal-in {
+  animation: reveal-in 0.35s ease-out;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .cursor-blink,
+  .reveal-in {
+    animation: none;
+  }
+}
