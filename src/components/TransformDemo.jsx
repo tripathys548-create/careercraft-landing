@@ -70,9 +70,11 @@ export default function TransformDemo() {
             />
             <span>
               I understand this demo shows an illustrative example, not a
-              rewrite of my actual profile. Signing in for real optimization
-              means sharing my LinkedIn profile information with
-              CareerCraft, per the{" "}
+              rewrite of my actual profile. Real optimization reads my
+              LinkedIn profile via a browser extension, which may violate
+              LinkedIn's User Agreement and can result in{" "}
+              <strong>restriction of my LinkedIn account</strong> — a real
+              risk, not a formality. See the{" "}
               <a href="#" className="underline hover:text-ink">
                 Terms &amp; Privacy Policy
               </a>

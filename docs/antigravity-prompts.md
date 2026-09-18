@@ -1,164 +1,175 @@
 # Ready-to-Paste Antigravity Prompts — CareerCraft
 
-Self-contained prompts for this repo only. None of them reference
-files in any other project — if a result ever tries to import from or
-copy a pattern out of a different repo, that's wrong; this project
-stands alone.
+Self-contained prompts for this repo. `backend/` and `extension/` are
+real, tested code (carried over from an earlier build of the same
+product, rebranded to CareerCraft) — these prompts are deployment and
+wiring tasks, not "build from scratch."
 
 ---
 
-## 1. Backend scaffold (decide the LinkedIn-capture mechanism first)
+## 1. Deploy the backend (do TODO.md item 1 yourself first)
 
-**Before running this**, decide how CareerCraft gets a user's LinkedIn
-data — see TODO.md step 1. Fill in the blank below before pasting.
+Before using this prompt, have all 9 secret values from `README.md`
+ready to paste.
 
 ```
-Build a new backend for CareerCraft (a LinkedIn-optimization product)
-in a new backend/ directory. Use Cloudflare Workers + a Postgres
-database (e.g. Neon) — pick whichever serverless host keeps this
-cheap to run at low volume, since margins depend on near-zero fixed
-cost per user.
+Deploy the backend in backend/ (Cloudflare Workers). Steps:
 
-Requirements:
+1. Read backend/README.md (or the root README.md) for the full list
+   of required secrets.
+2. Run `npx wrangler secret put <NAME>` for each of the 9 secrets —
+   I will paste each value when prompted, one at a time. Do not print
+   secret values back to me or log them anywhere.
+3. Run `npx wrangler deploy` from the backend/ directory.
+4. Confirm the deployment by sending a POST request to
+   <deployed-url>/create-order and showing me the raw response — it
+   should be a JSON object with `id`, `amount` (19900), and `currency`
+   fields from Razorpay, not an error.
+5. Report the deployed Workers URL back to me.
 
-1. Auth: email + OTP sign-in. Generate a one-time code, email it via
-   a transactional email API, verify it, then issue a signed session
-   token (e.g. a JWT or HMAC-signed opaque token) the frontend stores
-   and sends on subsequent requests. No server-side session table
-   needed.
-
-2. Payment: a Razorpay one-time order flow for ₹199.
-   - POST /create-order: creates a Razorpay order for 19900 paise.
-   - POST /payment-webhook: verifies the webhook signature by
-     computing HMAC-SHA256 of the raw request body using the
-     Razorpay webhook secret, comparing it against the
-     X-Razorpay-Signature header, and rejecting the request if they
-     don't match. Must be idempotent on Razorpay's payment ID — check
-     whether a record already exists for that payment ID before
-     creating anything new, so a retried webhook delivery is a no-op.
-   - On successful payment, mark the associated user account as paid.
-
-3. LinkedIn data capture: implement <FILL IN: OAuth / browser
-   extension / manual paste-in form, per TODO.md step 1>.
-
-4. All secrets (Razorpay keys, DB credentials, email provider key)
-   must be platform secrets, never committed to the repo or present
-   in any client-side code.
-
-5. Write tests for the auth flow and the payment webhook — especially
-   a test that an invalid/tampered signature is rejected, and a test
-   that a repeated webhook call for the same payment ID doesn't create
-   a duplicate paid-account record.
-
-Do not build LLM rewrite endpoints or PDF generation yet — those are
-separate follow-up tasks.
+Do not modify any application code in this task — this is deploy and
+verify only.
 ```
 
 ---
 
-## 2. LLM rewrite endpoints
+## 2. Deploy the landing page and wire the pricing button
 
 ```
-Add endpoints to backend/ for LLM-based LinkedIn profile rewriting.
-Require a valid, paid session (from the auth system already built)
-before calling the LLM, and rate-limit each account (e.g. 50 calls/day)
-as a cost/abuse guard independent of the one-time payment.
+1. Build and deploy the landing page (npm run build, then host the
+   output on Cloudflare Pages/Netlify/your choice). Report the live
+   URL.
 
-Endpoints needed:
-- Rewrite headline: SEO/recruiter-search-optimized, under ~220 characters.
-- Rewrite About section: three-part narrative (hook, journey, call to action).
-- Rewrite experience bullets: each starts with an action verb and
-  includes a metric.
-- Reorder/suggest skills: ranked by relevance to a target role, if one
-  is supplied alongside the request.
+2. In src/components/Pricing.jsx, the "Sign In & Pay ₹199" link is
+   currently href="#". Replace it with real behavior:
+   - On click, POST to <deployed backend URL>/create-order.
+   - Open Razorpay Checkout with the returned order (mirror the
+     amount/currency/order_id fields Razorpay's SDK expects — see
+     Razorpay's Checkout.js documentation for the exact shape).
+   - On successful payment, show a message telling the user their
+     license key will arrive by email (the backend's webhook handles
+     key generation and emailing already — don't rebuild that part).
+   - There is no separate "sign in" step in the backend yet — this
+     flow collects an email at checkout time, same as it does for the
+     license-key delivery. Don't build a login system as part of this
+     task; that's a separate decision (see TODO.md item 5).
 
-Implementation notes:
-- Use a low-cost, fast LLM (e.g. a "flash"/"mini" tier model) behind a
-  single provider-call function, so swapping providers later means
-  changing one function, not every endpoint.
-- Force JSON output via a strict system prompt describing the exact
-  shape expected. If the response fails to parse as JSON, retry once
-  with a stricter "return ONLY valid JSON, no surrounding text" prompt.
-  If it still fails, return a clean error response — never let a
-  malformed LLM response surface as a raw 500 to the frontend.
-- Log a request count per account for rate-limiting, but do not persist
-  the raw input profile text beyond what's needed to serve the
-  response — store generated outputs, not scraped/pasted inputs, to
-  minimize what's retained.
+Don't change the copy, layout, or any other component — only replace
+the dead link's behavior.
 ```
 
 ---
 
-## 3. PDF template rendering
+## 3. Wire up the extension
 
 ```
-Build PDF generation for 5 resume template styles: Fresher, Advanced,
-Expert, Technical, Executive. Look at src/components/Templates.jsx in
-this repo — it has small illustrative preview cards for each style
-already; match each PDF's actual layout to its preview's visual logic:
+Two placeholders need real values in extension/:
 
-- Fresher: single column, an accent-colored header bar, small skill tags.
-- Advanced: two-column balanced layout for experience entries.
-- Expert: a bold, prominent header block, achievement-focused body copy.
-- Technical: a skills-chip row placed near the top of the page.
-- Executive: minimal — thin rule lines separating sections, generous
-  whitespace, no decorative elements.
+- extension/src/background/background.js: replace the BACKEND_URL
+  placeholder with <PASTE DEPLOYED WORKERS URL>.
+- extension/src/popup/popup.html: replace the "Purchase here" link's
+  placeholder href with <PASTE LANDING PAGE URL>#pricing.
 
-Use a PDF library that doesn't require a headless browser (e.g.
-pdf-lib) so this stays deployable on the same serverless backend as
-everything else — no Chromium dependency. Each template takes
-structured content (name, headline, summary, experience[], education[],
-skills[]) and returns PDF bytes.
+Grep for the exact placeholder strings first, show me every match
+before editing, then make only these replacements. After that, load
+the extension unpacked in Chrome (chrome://extensions, Developer mode,
+Load unpacked, select extension/) and manually verify: the disclaimer
+blocks progress until checked, an invalid key is rejected, a valid key
+binds to a LinkedIn account on first rewrite, and the rewrite/DM/resume
+buttons each return real output from the deployed backend.
 ```
 
 ---
 
-## 4. Wire the landing page to the real backend
+## 4. Build the 5 PDF templates (or scale back the marketing claim)
 
 ```
-Two components in src/components/ currently use mocked/placeholder
-behavior instead of the real backend built in tasks 1-3:
+src/components/Templates.jsx on the landing page shows 5 illustrative
+resume template styles: Fresher, Advanced, Expert, Technical,
+Executive. backend/src/lib/pdf.ts currently only renders one generic
+layout via pdf-lib. Either:
 
-1. TransformDemo.jsx: right now, clicking "See Example" after checking
-   the consent box always shows the same hardcoded EXAMPLE object,
-   regardless of what URL was typed. Leave that exact behavior in
-   place for signed-out visitors — don't change the demo's honesty
-   framing ("this is an example, not your profile"). Add a *separate*
-   authenticated flow: once a user is signed in, paid, and has
-   provided their profile data (via whichever capture mechanism was
-   built), a real "Rewrite My Profile" action should call the actual
-   rewrite endpoint from task 2 and show real output, clearly not
-   labeled as an example.
+(a) Extend backend/src/lib/pdf.ts to accept a template name and render
+    5 distinct layouts matching each style's preview card in
+    Templates.jsx (e.g. Technical has a skills-chip row near the top,
+    Executive is minimal with thin rule lines, Fresher is single-column
+    with an accent header bar) — update backend/src/routes/generateResume.ts
+    to accept and pass through a template choice, and update its tests, OR
 
-2. Pricing.jsx: the "Sign In & Pay ₹199" button currently links to
-   "#". Wire it to open the real sign-in flow, and on success, the
-   real Razorpay Checkout modal for the ₹199 order from task 1.
+(b) If building 5 real templates isn't worth it right now, tell me
+    instead of guessing — I'll decide whether to descope the landing
+    page's Templates section down to what's actually built.
 
-Don't change the visual design or copy of either component — only
-replace the mocked/dead behavior with real calls.
+Don't silently ship a mismatch between what the landing page promises
+and what the backend renders.
 ```
 
 ---
 
-## 5. Terms, Privacy, and testimonials
+## 5. Admin UI
 
 ```
-Two content gaps:
+backend has three working, password-gated admin API routes with no
+frontend: GET /admin/messages, GET /admin/generations, GET /admin/keys
+(see backend/src/routes/admin.ts and backend/src/lib/adminAuth.ts for
+the exact auth mechanism — a Bearer token compared to ADMIN_PASSWORD).
 
-1. src/components/Testimonials.jsx has 3 placeholder quotes that were
-   never real customers. I will either provide real testimonial text
-   for you to use, or tell you to remove the section — do not write
-   new testimonial content yourself.
+Build a minimal internal admin page at admin/index.html (plain
+HTML/JS, no framework, no build step):
 
-2. Pricing.jsx, TransformDemo.jsx, and Footer.jsx all link to
-   "Terms & Privacy Policy" via href="#". Build real terms.html and
-   privacy.html pages (or routes, if routing has been added) matching
-   this project's existing design system (see src/index.css for the
-   color/font tokens already defined). Mark every substantive legal
-   clause as "[PLACEHOLDER: needs legal review]" rather than inventing
-   policy language. You may state plain facts about what the product
-   actually stores once the backend exists (e.g. "we store your email
-   and your optimized profile text") — just don't draft actual legal
-   terms (liability, arbitration, data retention periods, etc.)
-   yourself.
+- A password field (stores the entered password in memory only, never
+  localStorage) used as the Bearer token on every request.
+- Three sections: Support Messages, Generated Content, License Keys —
+  each renders the JSON array from its endpoint as a simple table.
+- For Support Messages, add a way to view a message and save a reply
+  into `admin_reply` (add a POST /admin/messages/:id/reply route in
+  admin.ts if it doesn't exist yet, following the existing route
+  patterns).
+
+Deploy this as its own page, not linked from any public page. Tell me
+where you deployed it.
+```
+
+---
+
+## 6. Support reply email delivery
+
+```
+backend/src/routes/admin.ts lets an admin save an admin_reply onto a
+support_messages row, but nothing emails it to the user. Add a
+function in backend/src/lib/email.ts (e.g. sendSupportReplyEmail,
+matching the existing sendLicenseKeyEmail's shape) that emails the
+reply to the row's `email` column after it's saved. Write a test
+following the pattern in backend/test/email.test.ts.
+```
+
+---
+
+## 7. Terms & Privacy Policy pages
+
+```
+The landing page's Pricing and TransformDemo sections both link to
+"Terms & Privacy Policy" via href="#" — CareerCraft has no ToS/Privacy
+page of its own yet. Build real pages matching this project's existing
+design system (see src/index.css for the color/font tokens).
+
+IMPORTANT: Do not write the actual legal content yourself. Fill each
+page with clearly marked placeholder sections (e.g. "[PLACEHOLDER:
+data retention policy — needs legal review]") for every substantive
+clause. You may state plain facts about what's actually stored — read
+backend/db/schema.sql for the real tables (license_keys, usage_log,
+generated_content, support_messages) and describe those factually.
+Link both pages from the landing page's footer and from the extension
+popup's first-run disclaimer.
+```
+
+---
+
+## 8. Testimonials
+
+```
+src/components/Testimonials.jsx has 3 placeholder quotes that were
+never real customers. I will either provide real testimonial text for
+you to use, or tell you to remove the section — do not write new
+testimonial content yourself.
 ```

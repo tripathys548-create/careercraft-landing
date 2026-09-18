@@ -52,8 +52,11 @@ export default function Pricing() {
           </a>
 
           <p className="mt-4 text-center text-xs text-ink-muted">
-            By signing in, you agree to share your LinkedIn profile
-            information with CareerCraft for optimization, per our{" "}
+            CareerCraft reads your LinkedIn profile via a browser
+            extension, which may violate LinkedIn's User Agreement and
+            can result in restriction of your LinkedIn account — a real
+            risk, not a formality. Purchase only if you accept this risk.
+            See our{" "}
             <a href="#" className="underline hover:text-ink">
               Terms &amp; Privacy Policy
             </a>

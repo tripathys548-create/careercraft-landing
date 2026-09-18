@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CareerCraft</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <!-- Screen 0: Disclaimer gate — must be acknowledged before anything else -->
+  <div id="disclaimer-screen" class="screen">
+    <h1>CareerCraft</h1>
+    <div class="notice">
+      <p>
+        This tool reads your LinkedIn profile using a browser extension and generates
+        AI-rewritten content. Using automation tools on LinkedIn may violate their
+        <a href="https://www.linkedin.com/legal/user-agreement" target="_blank">User Agreement</a>
+        and can result in <strong>permanent restriction of your account</strong>.
+      </p>
+      <p>
+        This is a real operational risk. Review LinkedIn's policy before proceeding.
+      </p>
+    </div>
+    <label class="checkbox-label">
+      <input type="checkbox" id="ack-checkbox" />
+      <span>I understand and accept this risk</span>
+    </label>
+    <button id="ack-continue" class="btn-primary" disabled>Continue</button>
+  </div>
+
+  <!-- Screen 1: License key entry -->
+  <div id="key-screen" class="screen" hidden>
+    <h1>Activate</h1>
+    <p class="muted">Paste the license key from your purchase email.</p>
+    <input
+      id="key-input"
+      type="text"
+      placeholder="LKX-XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button id="key-submit" class="btn-primary">Activate Key</button>
+    <p id="key-error" class="error-text" hidden></p>
+    <p class="muted">
+      Don't have a key?
+      <a href="https://YOUR-CHECKOUT-DOMAIN/checkout" target="_blank">Purchase here →</a>
+    </p>
+  </div>
+
+  <!-- Screen 2: Main feature panel -->
+  <div id="main-screen" class="screen" hidden>
+    <header class="panel-header">
+      <h1>CareerCraft</h1>
+      <button id="deactivate-btn" class="btn-text" title="Deactivate key">Deactivate</button>
+    </header>
+
+    <p class="muted instruction">Navigate to a LinkedIn profile page, then use the tools below.</p>
+
+    <div class="feature-group">
+      <button id="rewrite-btn" class="btn-feature">Rewrite My Profile</button>
+      <p class="feature-desc">Rewrites your Headline, About, and Experience using AI.</p>
+    </div>
+
+    <div class="feature-group">
+      <button id="dm-btn" class="btn-feature">Draft Referral DM</button>
+      <p class="feature-desc">Generates a ~75-word cold-outreach message to the person on this profile.</p>
+    </div>
+
+    <div class="feature-group">
+      <button id="resume-btn" class="btn-feature">Download Resume PDF</button>
+      <p class="feature-desc">Builds a clean PDF resume from your profile. One-time generation, free.</p>
+    </div>
+
+    <div id="results" hidden>
+      <h2 id="results-title"></h2>
+      <div id="results-content"></div>
+    </div>
+
+    <div id="spinner" class="spinner" hidden>Generating…</div>
+
+    <footer>
+      <button id="support-btn" class="btn-text">Contact Support</button>
+    </footer>
+  </div>
+
+  <!-- Screen 3: Support message form -->
+  <div id="support-screen" class="screen" hidden>
+    <h1>Contact Support</h1>
+    <input id="support-email" type="email" placeholder="Your email" />
+    <textarea id="support-message" placeholder="Describe your issue" rows="4"></textarea>
+    <button id="support-submit" class="btn-primary">Send</button>
+    <button id="support-back" class="btn-text">← Back</button>
+    <p id="support-status" class="muted" hidden></p>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

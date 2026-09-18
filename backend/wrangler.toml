@@ -1,0 +1,6 @@
+name = "careercraft-backend"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+[vars]
+# non-secret vars only; secrets are set via `wrangler secret put`

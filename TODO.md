@@ -1,113 +1,62 @@
 # Remaining Work — CareerCraft
 
-Standalone product, standalone repo. Nothing here depends on or
-shares infrastructure with any other project — if a task ever says
-"like the other project does it," that's a mistake, flag it back.
+Standalone product, standalone repo. As of this merge, the backend and
+extension are real, tested code carried over from an earlier build of
+the same underlying product (rebranded, repriced to ₹199 one-time) —
+this is no longer "landing page mockup + no backend," it's "one real
+product not yet deployed, plus a landing page with a few dead links."
 
-Status: **mockup only**. No backend, no auth, no payment, no real
-LinkedIn data ever touched. Every "Sign In" / "Get Started" / "Sign In
-& Pay ₹199" link is a dead `href="#"`.
+Nothing below touches license-binding, webhook signature verification,
+or admin auth in `backend/` — those were reviewed and are correct
+as-is. Don't let Antigravity "improve" them without a specific reason.
 
-## 1. Decide the LinkedIn data-capture mechanism (a decision, not a task)
+## 1. Provision real accounts and secrets
+- [ ] Create a Neon Postgres database, run `backend/db/schema.sql` against it.
+- [ ] Create a Cloudflare account, `wrangler login`.
+- [ ] Create a Razorpay account (test mode first), get `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`.
+- [ ] Pick an LLM provider (Gemini Flash / GPT-4o-mini class) and get an API key.
+- [ ] Pick a transactional email provider (Resend/Brevo) and get an API key.
+- [ ] Choose an `ADMIN_PASSWORD`.
+- **Comment for Antigravity:** none of this is a coding task — these are accounts only you can create.
 
-Before any backend work starts, decide how CareerCraft actually gets a
-user's LinkedIn profile content:
+## 2. Deploy the backend
+- [ ] `wrangler secret put` for all 9 secrets listed in `README.md`.
+- [ ] `npx wrangler deploy` from `backend/`.
+- [ ] Register a Razorpay webhook pointing at `<deployed-url>/payment-webhook`; set its signing secret as `RAZORPAY_WEBHOOK_SECRET`.
 
-- **LinkedIn OAuth** — check LinkedIn's API terms first; the scopes
-  needed to read profile sections like About/Experience are heavily
-  restricted and this may not be permitted for this use case at all.
-- **A browser extension** that reads the logged-in user's own profile
-  DOM — technically reliable, but carries real LinkedIn ToS risk (their
-  User Agreement prohibits this kind of automation, with account
-  restriction as the consequence, not just a takedown).
-- **Manual paste-in** — user copies their headline/About/experience
-  text into a form themselves. Safest option, weakest UX, zero ToS
-  exposure since nothing is read from LinkedIn automatically.
+## 3. Deploy the landing page and wire it up
+- [ ] Deploy the landing page (`npm run build`, host the output — Cloudflare Pages, Netlify, etc.).
+- [ ] Set that origin as `CHECKOUT_ORIGIN` secret on the backend.
+- [ ] Wire `src/components/Pricing.jsx`'s "Sign In & Pay ₹199" button to actually call `POST /create-order` and open Razorpay Checkout — right now it's a dead `href="#"`. There's no real "sign in" step in the backend yet (see item 6); until that exists, this can go straight to payment like the original product did, keyed to email collected at checkout.
+- [ ] Wire `src/components/TransformDemo.jsx`'s real (post-purchase) path once a license key exists — keep the current canned-example behavior for anyone who hasn't paid; that framing is intentional, not a placeholder to remove.
 
-This choice shapes the auth design (an extension needs a companion
-sign-in flow different from a pure web form) — decide it before
-starting task 2.
+## 4. Wire up the extension
+- [ ] Set `BACKEND_URL` in `extension/src/background/background.js` to the deployed Workers URL.
+- [ ] Set the real checkout URL in `extension/src/popup/popup.html`'s "Purchase here" link.
+- [ ] Load unpacked in Chrome and test end-to-end against the deployed backend before publishing to the Chrome Web Store.
 
-## 2. Backend (from scratch)
-
-- [ ] **Auth**: email + OTP sign-in. Store a signed session token;
-      no need for a server-side session table.
-- [ ] **Payment**: Razorpay one-time ₹199 order + webhook. The webhook
-      handler MUST verify Razorpay's HMAC-SHA256 signature on every
-      request before trusting the payload (compute HMAC-SHA256 of the
-      raw request body using the webhook secret, compare against the
-      `X-Razorpay-Signature` header) and MUST be idempotent on
-      Razorpay's payment ID (check for an existing record before
-      creating a new one) so a retried webhook delivery doesn't
-      double-process a payment.
-- [ ] **LinkedIn data capture**: implement whichever mechanism was
-      chosen in step 1.
-- [ ] **Secrets**: Razorpay keys, LLM API key, email provider key, DB
-      credentials — all as platform secrets (e.g. Cloudflare Workers
-      secrets, or your chosen host's equivalent), never in client code
-      or committed to the repo.
-- [ ] Tests for auth and payment logic, including the webhook
-      signature-verification and idempotency behavior specifically —
-      those are the two places a bug is expensive.
-
-## 3. LLM rewrite endpoints
-
-- [ ] Endpoints to rewrite: headline (recruiter-search-optimized),
-      About section (three-part narrative: hook, journey, CTA),
-      experience bullets (action verb + metric), skills (reordered by
-      relevance to a target role, if one is given).
-- [ ] Force the LLM to return structured JSON via a strict system
-      prompt; if the response fails to parse as JSON, retry once with
-      a stricter "return ONLY valid JSON" prompt before giving up and
-      returning a clean error — don't let a malformed response reach
-      the user as a raw 500.
-- [ ] Rate-limit per account (e.g. a daily cap) as a cost/abuse guard,
-      independent of the one-time payment — this stops a single
-      compromised account from generating unbounded LLM spend.
-
-## 4. PDF template rendering
-
-The landing page shows 5 illustrative template styles in
-`src/components/Templates.jsx`: **Fresher, Advanced, Expert,
-Technical, Executive**. Build real rendering for each, matching that
-component's visual logic:
-- Fresher: single column, accent header bar, skill tags
-- Advanced: two-column balance
-- Expert: bold header block, achievement-focused
-- Technical: skills-chip row near the top
-- Executive: minimal, thin rule lines, lots of whitespace
-
-Use a pure client/server-side PDF library that doesn't require a
-headless browser (e.g. `pdf-lib` if the backend runs on a serverless
-edge platform) to keep hosting costs low.
-
-## 5. Wire the landing page to the real backend
-
-- [ ] `src/components/TransformDemo.jsx` currently always shows the
-      same hardcoded example on submit. For a signed-in, paid user
-      with real profile data, call the real rewrite endpoint instead —
-      but keep the "this is an example, not your profile" framing for
-      signed-out visitors exactly as it is now; don't let a signed-out
-      demo ever imply it processed someone's real data.
-- [ ] `src/components/Pricing.jsx`'s "Sign In & Pay ₹199" button needs
-      to open the real sign-in flow, then Razorpay Checkout.
+## 5. Missing pieces, not yet built
+- [ ] **Terms & Privacy Policy pages.** The landing page's Pricing and TransformDemo sections both link to "Terms & Privacy Policy" via `href="#"`. Needed before real payments — most jurisdictions require this for a paid product, and this product's own disclaimer copy promises one exists.
+- [ ] **Admin UI.** `backend`'s `/admin/messages`, `/admin/generations`, `/admin/keys` are working, password-gated API endpoints with no frontend.
+- [ ] **Support reply delivery.** Admin can write a reply into `support_messages`, but nothing emails it to the user.
+- [ ] **5 PDF templates.** The landing page's `src/components/Templates.jsx` shows 5 illustrative styles (Fresher, Advanced, Expert, Technical, Executive) as a marketing showcase — `backend/src/lib/pdf.ts` only renders 1 generic layout. Either build the other 4, or scale the marketing claim back to match what's real.
+- [ ] **Real sign-in.** The landing page's copy ("Sign In & Pay ₹199") implies an account/sign-in system that doesn't exist in the backend — it currently works like the original product: pay, get a license key by email, activate it in the extension. Decide whether to build real sign-in or adjust the landing page copy to match reality.
 
 ## 6. Content gaps
+- [ ] `src/components/Testimonials.jsx` has 3 placeholder quotes that were never real customers — replace with real ones (you provide the text) or remove the section.
 
-- [ ] `src/components/Testimonials.jsx` has 3 placeholder quotes that
-      were never real customers — replace with real ones (you provide
-      the text) or remove the section. Do not write new fabricated
-      testimonials.
-- [ ] `Pricing.jsx`, `TransformDemo.jsx`, and `Footer.jsx` all link to
-      "Terms & Privacy Policy" via `href="#"`. Build real pages, but
-      mark every substantive legal clause as
-      `[PLACEHOLDER: needs legal review]` rather than inventing policy
-      language — only state plain facts about what's actually stored
-      once the backend exists (e.g. "we store your email and your
-      optimized profile text").
+## 7. Before accepting real money
+- [ ] One full manual pass with Razorpay **test mode**: pay → webhook fires → key emailed → extension activates → key binds on first rewrite → resume generates once and re-serves on second click → DM generates.
+- [ ] Switch Razorpay from test to live keys only after the above passes.
+
+## Explicitly out of scope (don't build unless you change your mind)
+- Bulk/college licensing (batch key generation).
+- Self-serve license rebinding — deferred to manual support.
 
 ## Suggested order
 
-1. Resolve step 1 (LinkedIn capture mechanism) — a conversation, not a task.
-2. Step 2 (backend) → step 3 (LLM) → step 4 (PDF) → step 5 (wire it up).
-3. Step 6 (content) can happen anytime, in parallel.
+1 → 2 → 3 → 4 → 7 (get the real product live — the hard engineering
+work is done, this is deployment + wiring). Item 5's "real sign-in"
+question should be resolved before spending time polishing the
+Pricing/TransformDemo wiring in item 3, since it changes that flow.
+Item 6 can happen anytime, independent of the rest.
