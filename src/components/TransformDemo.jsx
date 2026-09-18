@@ -75,8 +75,12 @@ export default function TransformDemo() {
               LinkedIn's User Agreement and can result in{" "}
               <strong>restriction of my LinkedIn account</strong> — a real
               risk, not a formality. See the{" "}
-              <a href="#" className="underline hover:text-ink">
-                Terms &amp; Privacy Policy
+              <a href="/terms.html" className="underline hover:text-ink">
+                Terms
+              </a>{" "}
+              &amp;{" "}
+              <a href="/privacy.html" className="underline hover:text-ink">
+                Privacy Policy
               </a>
               .
             </span>

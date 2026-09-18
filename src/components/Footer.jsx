@@ -5,9 +5,9 @@ const LINKS = [
   { label: "LinkedIn Optimization", href: "#process" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
-  { label: "Privacy", href: "#" },
-  { label: "Terms", href: "#" },
-  { label: "Contact", href: "#" },
+  { label: "Privacy", href: "/privacy.html" },
+  { label: "Terms", href: "/terms.html" },
+  { label: "Contact", href: "mailto:support@webelvate.com" },
 ];
 
 export default function Footer() {

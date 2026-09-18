@@ -121,8 +121,12 @@ export default function Pricing() {
             can result in restriction of your LinkedIn account — a real
             risk, not a formality. Purchase only if you accept this risk.
             See our{" "}
-            <a href="#" className="underline hover:text-ink">
-              Terms &amp; Privacy Policy
+            <a href="/terms.html" className="underline hover:text-ink">
+              Terms
+            </a>{" "}
+            &amp;{" "}
+            <a href="/privacy.html" className="underline hover:text-ink">
+              Privacy Policy
             </a>
             .
           </p>
