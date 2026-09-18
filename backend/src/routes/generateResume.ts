@@ -3,7 +3,9 @@ import { getDb } from '../lib/db';
 import { validateAndBindKey } from '../lib/validateKey';
 import { checkRateLimit, logUsage } from '../lib/rateLimit';
 import { callLLMJson } from '../lib/llm';
-import { renderResumePdf } from '../lib/pdf';
+import { renderResumePdf, TemplateName } from '../lib/pdf';
+
+const VALID_TEMPLATES: TemplateName[] = ['modern', 'classic', 'compact'];
 
 const SYSTEM_PROMPT = `Structure this LinkedIn profile into resume content.
 Return ONLY JSON matching: {"summary": string, "experience": string[], "education": string[], "skills": string[]}.`;
@@ -18,6 +20,7 @@ export async function handleGenerateResume(request: Request, env: Env): Promise<
     experience?: string;
     education?: string;
     skills?: string;
+    template?: string;
   }>();
 
   const sql = getDb(env);
@@ -60,14 +63,20 @@ export async function handleGenerateResume(request: Request, env: Env): Promise<
     return jsonResponse(env, { ok: false, error: 'generation_failed' }, 502);
   }
 
-  const pdfBytes = await renderResumePdf({
-    name: body.name ?? '',
-    headline: body.headline ?? '',
-    summary: structured.summary,
-    experience: structured.experience,
-    education: structured.education,
-    skills: structured.skills,
-  });
+  const template: TemplateName = VALID_TEMPLATES.includes(body.template as TemplateName)
+    ? (body.template as TemplateName)
+    : 'modern';
+  const pdfBytes = await renderResumePdf(
+    {
+      name: body.name ?? '',
+      headline: body.headline ?? '',
+      summary: structured.summary,
+      experience: structured.experience,
+      education: structured.education,
+      skills: structured.skills,
+    },
+    template
+  );
 
   await logUsage(sql, body.key, 'generate-resume');
   await sql`INSERT INTO generated_content (key, endpoint, output_blob) VALUES (${body.key}, 'generate-resume', ${Buffer.from(pdfBytes)})`;

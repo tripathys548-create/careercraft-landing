@@ -3,7 +3,9 @@ import { getDb } from '../lib/db';
 import { validateAndBindKey } from '../lib/validateKey';
 import { checkRateLimit, logUsage } from '../lib/rateLimit';
 import { callLLMJson } from '../lib/llm';
-import { renderResumePdf } from '../lib/pdf';
+import { renderResumePdf, TemplateName } from '../lib/pdf';
+
+const VALID_TEMPLATES: TemplateName[] = ['modern', 'classic', 'compact'];
 
 const SYSTEM_PROMPT = `You are a LinkedIn profile grader and rewriter for Indian tech job seekers.
 
@@ -48,6 +50,7 @@ interface AnalyzeRequestBody {
   education?: string;
   skills?: string;
   rawText?: string;
+  template?: string;
 }
 
 function deriveLinkedinId(url?: string): string | null {
@@ -110,14 +113,20 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
   // Best-effort resume PDF from the same rewrite — never fail the whole request over this.
   let resumePdfBase64: string | null = null;
   try {
-    const pdfBytes = await renderResumePdf({
-      name: body.name ?? '',
-      headline: result.rewrite?.headline ?? body.headline ?? '',
-      summary: result.rewrite?.about ?? body.about ?? '',
-      experience: result.rewrite?.experience ?? [],
-      education: body.education ? body.education.split('\n').filter(Boolean) : [],
-      skills: result.rewrite?.skills ?? [],
-    });
+    const template: TemplateName = VALID_TEMPLATES.includes(body.template as TemplateName)
+      ? (body.template as TemplateName)
+      : 'modern';
+    const pdfBytes = await renderResumePdf(
+      {
+        name: body.name ?? '',
+        headline: result.rewrite?.headline ?? body.headline ?? '',
+        summary: result.rewrite?.about ?? body.about ?? '',
+        experience: result.rewrite?.experience ?? [],
+        education: body.education ? body.education.split('\n').filter(Boolean) : [],
+        skills: result.rewrite?.skills ?? [],
+      },
+      template
+    );
     let binary = '';
     const chunkSize = 8192;
     for (let i = 0; i < pdfBytes.length; i += chunkSize) {

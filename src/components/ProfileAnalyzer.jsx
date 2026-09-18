@@ -24,6 +24,12 @@ const EMPTY_FORM = {
   skills: "",
 };
 
+const TEMPLATES = [
+  { id: "modern", label: "Modern", description: "Colored header band, sans-serif — reads as contemporary/tech." },
+  { id: "classic", label: "Classic", description: "Serif, black & white — traditional, conservative fields." },
+  { id: "compact", label: "Compact", description: "Tighter spacing, fits more on one page." },
+];
+
 function scoreColor(score) {
   if (score >= 75) return "text-brand-hover";
   if (score >= 50) return "text-accent-yellow";
@@ -61,6 +67,7 @@ function downloadPdf(base64, filename) {
 
 export default function ProfileAnalyzer() {
   const [mode, setMode] = useState("paste"); // "paste" | "upload"
+  const [template, setTemplate] = useState("modern");
   const [form, setForm] = useState(EMPTY_FORM);
   const [rawText, setRawText] = useState("");
   const [pdfFileName, setPdfFileName] = useState("");
@@ -107,6 +114,7 @@ export default function ProfileAnalyzer() {
         linkedinUrl: form.linkedinUrl.trim() || undefined,
         name: form.name.trim() || undefined,
         education: form.education.trim() || undefined,
+        template,
       };
 
       if (mode === "paste") {
@@ -314,6 +322,27 @@ export default function ProfileAnalyzer() {
                   placeholder="B.Tech CS, IIT ..."
                   className="mt-1.5 w-full rounded-lg border-2 border-ink bg-white px-4 py-2.5 text-sm text-ink focus:outline-none"
                 />
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <label className="block text-xs font-bold uppercase tracking-wide text-ink-muted">
+                Resume template
+              </label>
+              <div className="mt-1.5 grid grid-cols-3 gap-2">
+                {TEMPLATES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setTemplate(t.id)}
+                    title={t.description}
+                    className={`rounded-lg border-2 border-ink px-3 py-2.5 text-xs font-bold uppercase tracking-wide transition-colors ${
+                      template === t.id ? "bg-brand text-ink" : "bg-white text-ink-muted"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
               </div>
             </div>
 
