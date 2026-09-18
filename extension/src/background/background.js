@@ -3,8 +3,8 @@
  * Never receives or stores raw scraped content. License key is stored in local storage.
  */
 
-// TODO: Replace with your actual deployed Cloudflare Worker URL after `wrangler deploy`
-const BACKEND_URL = 'https://careercraft-backend.YOUR-SUBDOMAIN.workers.dev';
+// Deployed Cloudflare Worker URL
+const BACKEND_URL = 'https://careercraft-backend.careercraft-backend.workers.dev';
 
 async function getStoredKey() {
   const { licenseKey } = await chrome.storage.local.get('licenseKey');
