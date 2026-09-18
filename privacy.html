@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy — CareerCraft</title>
+    <meta name="description" content="How CareerCraft collects, uses, and stores your LinkedIn profile data and payment information." />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+    <style>:root{--lightningcss-light:initial;--lightningcss-dark: ;color-scheme:light}body{color:#111;background:#fdfaf3;margin:0;font-family:Inter,sans-serif;line-height:1.6}.wrap{max-width:720px;margin:0 auto;padding:48px 20px 96px}a{color:#111}h1{margin-bottom:.25em;font-family:Space Grotesk,sans-serif;font-size:2rem}h2{margin-top:2.5em;font-family:Space Grotesk,sans-serif;font-size:1.25rem}.updated{color:#6b6b6b;margin-bottom:2.5em;font-size:.9rem}.back{margin-bottom:2em;font-weight:600;text-decoration:none;display:inline-block}.back:hover{text-decoration:underline}table{border-collapse:collapse;width:100%;margin:1em 0}th,td{text-align:left;vertical-align:top;border-bottom:1px solid #ddd;padding:8px 10px;font-size:.92rem}th{font-family:Space Grotesk,sans-serif}ul{padding-left:1.2em}li{margin-bottom:.5em}.placeholder{background:#fff8dc;border-radius:3px;padding:0 4px}</style>
+  </head>
+  <body>
+    <div class="wrap">
+      <a class="back" href="/">← Back to CareerCraft</a>
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: <span class="placeholder">[DATE — fill in before launch]</span></p>
+
+      <p>
+        This Privacy Policy explains what data CareerCraft (operated by
+        <span class="placeholder">[Legal entity name]</span>) collects when you use our
+        website, browser extension, and related services, and how that data is used and
+        stored.
+      </p>
+
+      <h2>1. What We Collect</h2>
+      <table>
+        <tr><th>Data</th><th>Source</th><th>Purpose</th></tr>
+        <tr>
+          <td>LinkedIn headline, About text, experience bullets, education, skills</td>
+          <td>Read from your own LinkedIn profile page by the browser extension, client-side</td>
+          <td>Sent to our backend to generate AI rewrite suggestions and a matching resume</td>
+        </tr>
+        <tr>
+          <td>LinkedIn public ID (the "in/username" part of your profile URL)</td>
+          <td>Extracted from the page URL by the extension</td>
+          <td>Bind your license key to your LinkedIn account so it can't be reused elsewhere</td>
+        </tr>
+        <tr>
+          <td>Email address</td>
+          <td>Provided to Razorpay at checkout</td>
+          <td>Deliver your license key and purchase receipt</td>
+        </tr>
+        <tr>
+          <td>Payment details (card/UPI/netbanking)</td>
+          <td>Entered directly into Razorpay's checkout</td>
+          <td>Process payment. We never see or store your full card/UPI details — Razorpay handles this.</td>
+        </tr>
+        <tr>
+          <td>Support messages</td>
+          <td>Submitted by you via the extension's support form</td>
+          <td>Respond to your question or issue</td>
+        </tr>
+      </table>
+
+      <p>
+        We do not collect your LinkedIn password. The extension only reads text that is
+        already visible on the page while you are signed into LinkedIn in your own browser —
+        it does not access your LinkedIn login credentials at any point.
+      </p>
+
+      <h2>2. How We Use Your Data</h2>
+      <ul>
+        <li>To generate AI-rewritten profile content and resume PDFs via our backend and our AI model provider.</li>
+        <li>To validate and enforce one license key per LinkedIn account.</li>
+        <li>To send your license key and transactional emails (e.g., purchase confirmation).</li>
+        <li>To respond to support requests.</li>
+        <li>To monitor for abuse (e.g., rate-limiting excessive requests from one IP or key).</li>
+      </ul>
+      <p>We do not sell your data, and we do not use it to train third-party AI models beyond the single request needed to generate your rewrite.</p>
+
+      <h2>3. Third Parties We Use</h2>
+      <table>
+        <tr><th>Provider</th><th>Purpose</th></tr>
+        <tr><td>Razorpay</td><td>Payment processing</td></tr>
+        <tr><td>Google (Gemini API)</td><td>AI generation of rewritten profile content and resumes</td></tr>
+        <tr><td>Resend</td><td>Transactional email delivery (license key, receipts)</td></tr>
+        <tr><td>Neon (Postgres)</td><td>Database storage of license keys and generation logs</td></tr>
+        <tr><td>Cloudflare Workers</td><td>Hosting of our backend API</td></tr>
+      </table>
+      <p>Each of these providers processes data under their own privacy policy and terms.</p>
+
+      <h2>4. Data Retention</h2>
+      <p>
+        We retain license key records and generation logs (the profile text you submitted
+        and the AI output) for as long as your license key remains active, and for a
+        reasonable period afterward for support and fraud-prevention purposes. You can
+        request deletion of your data at any time — see Section 6.
+      </p>
+
+      <h2>5. Data Security</h2>
+      <p>
+        Data is transmitted over HTTPS. License keys are validated server-side before any
+        profile data is processed. Access to production data and secrets is restricted to
+        the operators of CareerCraft.
+      </p>
+
+      <h2>6. Your Rights</h2>
+      <p>
+        You can request a copy of the data we hold about you, or request that we delete it,
+        by emailing <a href="mailto:support@webelvate.com">support@webelvate.com</a> with the
+        email address or license key associated with your purchase. We will respond within
+        a reasonable time, and in any case within the timeframe required by applicable law.
+      </p>
+
+      <h2>7. Children's Privacy</h2>
+      <p>CareerCraft is not directed at anyone under 18, and we do not knowingly collect data from minors.</p>
+
+      <h2>8. Changes to This Policy</h2>
+      <p>
+        We may update this Privacy Policy from time to time. Material changes will be
+        reflected by updating the "Last updated" date above.
+      </p>
+
+      <h2>9. Contact</h2>
+      <p>
+        Questions about this Privacy Policy? Email
+        <a href="mailto:support@webelvate.com">support@webelvate.com</a>.
+      </p>
+
+      <p style="margin-top:3em; color:#6b6b6b; font-size:0.85rem;">
+        This document is a starting template, not legal advice. Have it reviewed by a
+        lawyer before going live, especially the data retention and third-party sections
+        once your actual provider list is finalized.
+      </p>
+    </div>
+  </body>
+</html>
