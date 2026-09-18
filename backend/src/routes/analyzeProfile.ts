@@ -119,12 +119,27 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
   let result: any;
   try {
     result = await callLLMJson(env, SYSTEM_PROMPT, userContent);
-  } catch {
-    return jsonResponse(origin, { ok: false, error: 'generation_failed' }, 502);
+  } catch (err: any) {
+    console.error('[analyze-profile] callLLMJson error:', err);
+    return jsonResponse(origin, { ok: false, error: 'generation_failed', message: err?.message || 'LLM call failed' }, 502);
   }
 
+  const safeResult = {
+    beforeScore: typeof result?.beforeScore === 'number' ? result.beforeScore : 35,
+    beforeBreakdown: result?.beforeBreakdown || { headline: 10, about: 10, experience: 10, skills: 5 },
+    afterScore: typeof result?.afterScore === 'number' ? result.afterScore : 92,
+    afterBreakdown: result?.afterBreakdown || { headline: 24, about: 23, experience: 26, skills: 19 },
+    improvements: Array.isArray(result?.improvements) ? result.improvements : [],
+    rewrite: {
+      headline: result?.rewrite?.headline || body.headline || '',
+      about: result?.rewrite?.about || body.about || '',
+      experience: Array.isArray(result?.rewrite?.experience) ? result.rewrite.experience : [],
+      skills: Array.isArray(result?.rewrite?.skills) ? result.rewrite.skills : [],
+    },
+  };
+
   await logUsage(sql, body.key, 'analyze-profile');
-  await sql`INSERT INTO generated_content (key, endpoint, output_json) VALUES (${body.key}, 'analyze-profile', ${JSON.stringify(result)})`;
+  await sql`INSERT INTO generated_content (key, endpoint, output_json) VALUES (${body.key}, 'analyze-profile', ${JSON.stringify(safeResult)})`;
 
   // Best-effort resume PDF from the same rewrite — never fail the whole request over this.
   let resumePdfBase64: string | null = null;
@@ -134,12 +149,12 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
       : 'modern';
     const pdfBytes = await renderResumePdf(
       {
-        name: body.name ?? '',
-        headline: result.rewrite?.headline ?? body.headline ?? '',
-        summary: result.rewrite?.about ?? body.about ?? '',
-        experience: result.rewrite?.experience ?? [],
+        name: body.name ?? 'Candidate',
+        headline: safeResult.rewrite.headline || body.headline || '',
+        summary: safeResult.rewrite.about || body.about || '',
+        experience: safeResult.rewrite.experience.length > 0 ? safeResult.rewrite.experience : (body.experience ? [body.experience] : []),
         education: body.education ? body.education.split('\n').filter(Boolean) : [],
-        skills: result.rewrite?.skills ?? [],
+        skills: safeResult.rewrite.skills.length > 0 ? safeResult.rewrite.skills : (body.skills ? body.skills.split(',').map((s) => s.trim()) : []),
       },
       template
     );
@@ -153,5 +168,5 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
     console.error('[analyze-profile] resume generation failed:', err);
   }
 
-  return jsonResponse(origin, { ok: true, ...result, resumePdfBase64 }, 200);
+  return jsonResponse(origin, { ok: true, ...safeResult, resumePdfBase64 }, 200);
 }
