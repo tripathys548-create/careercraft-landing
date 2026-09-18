@@ -100,17 +100,17 @@ export async function handleVerifyPayment(request: Request, env: Env): Promise<R
         licenseKey = existing[0].key;
       } else {
         licenseKey = generateLicenseKey();
-        const userEmail = body.email || null;
-        await sql`INSERT INTO license_keys (key, email, razorpay_payment_id) VALUES (${licenseKey}, ${userEmail}, ${paymentId})`;
-        if (userEmail && env.EMAIL_API_KEY) {
-          await sendLicenseKeyEmail(env, userEmail, licenseKey).catch((err) =>
+        const userEmail = body.email || `customer_${paymentId.slice(-8)}@careercraft.com`;
+        await sql`INSERT INTO license_keys (key, email, razorpay_payment_id, status) VALUES (${licenseKey}, ${userEmail}, ${paymentId}, 'active') ON CONFLICT (key) DO NOTHING`;
+        if (body.email && env.EMAIL_API_KEY) {
+          await sendLicenseKeyEmail(env, body.email, licenseKey).catch((err) =>
             console.error('Failed to send license key email:', err)
           );
         }
       }
     }
   } catch (dbErr) {
-    console.warn('Database license key creation skipped/failed:', dbErr);
+    console.error('Database license key creation error in verifyPayment:', dbErr);
   }
 
   return new Response(

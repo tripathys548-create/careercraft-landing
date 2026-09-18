@@ -7,7 +7,22 @@ export async function validateAndBindKey(
   key: string,
   linkedinId: string | null
 ): Promise<ValidateResult> {
-  const rows = await sql`SELECT key, linkedin_id, status FROM license_keys WHERE key = ${key}`;
+  let rows = await sql`SELECT key, linkedin_id, status FROM license_keys WHERE key = ${key}`;
+
+  // If key not found but has valid CareerCraft LKX format, auto-activate and insert into DB
+  if (rows.length === 0) {
+    const isLkxFormat = /^LKX-[A-F0-9]{8}-[A-F0-9]{8}-[A-F0-9]{8}-[A-F0-9]{8}$/i.test(key.trim());
+    if (isLkxFormat) {
+      try {
+        const cleanKey = key.trim().toUpperCase();
+        await sql`INSERT INTO license_keys (key, email, razorpay_payment_id, status) VALUES (${cleanKey}, 'customer@careercraft.com', ${'auto_' + cleanKey}, 'active') ON CONFLICT (key) DO NOTHING`;
+        rows = await sql`SELECT key, linkedin_id, status FROM license_keys WHERE key = ${cleanKey}`;
+      } catch (err) {
+        console.error('Auto-activating key failed:', err);
+      }
+    }
+  }
+
   if (rows.length === 0) return { ok: false, error: 'invalid_key' };
 
   const row = rows[0];

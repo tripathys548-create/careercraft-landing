@@ -59,15 +59,19 @@ function deriveLinkedinId(url?: string): string | null {
   return match ? match[1] : null;
 }
 
-// A real user's browser can never send Origin: http://localhost:*, so echoing
-// it back here only ever helps local `wrangler dev` testing — it does not
-// widen who can read this response in production.
 function resolveOrigin(request: Request, env: Env): string {
   const origin = request.headers.get('Origin') ?? '';
-  if (origin === env.CHECKOUT_ORIGIN || /^http:\/\/localhost:\d+$/.test(origin)) {
+  if (
+    origin === env.CHECKOUT_ORIGIN ||
+    origin === env.EXTENSION_ORIGIN ||
+    origin === 'https://careercraftt.webelvate.com' ||
+    origin === 'https://careercraft.webelvate.com' ||
+    /^https?:\/\/([a-z0-9-]+\.)*webelvate\.com$/.test(origin) ||
+    /^http:\/\/localhost:\d+$/.test(origin)
+  ) {
     return origin;
   }
-  return env.CHECKOUT_ORIGIN;
+  return env.CHECKOUT_ORIGIN || '*';
 }
 
 function jsonResponse(origin: string, body: unknown, status: number): Response {
