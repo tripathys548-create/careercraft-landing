@@ -7,6 +7,7 @@ import JobMatching from "./components/JobMatching";
 import Features from "./components/Features";
 import ResumePreviewSection from "./components/ResumePreviewSection";
 import Trust from "./components/Trust";
+import Comparison from "./components/Comparison";
 import UKPrivacySection from "./components/UKPrivacySection";
 import Pricing from "./components/Pricing";
 import ProfileAnalyzer from "./components/ProfileAnalyzer";
@@ -72,7 +73,6 @@ export default function App() {
 
     // Hreflang alternates
     if (marketConfig.seo.alternateHreflangs) {
-      // Remove old alternates
       document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
       marketConfig.seo.alternateHreflangs.forEach((alt) => {
         const link = document.createElement('link');
@@ -125,6 +125,9 @@ export default function App() {
 
         {/* Verified Principles & Trust */}
         <Trust marketConfig={marketConfig} />
+
+        {/* Category Comparison Table */}
+        <Comparison marketConfig={marketConfig} />
 
         {/* UK/EU Data Processing & Privacy Facts Section */}
         {marketId === "uk" && <UKPrivacySection marketConfig={marketConfig} />}

@@ -1,6 +1,6 @@
 /**
  * CareerCraft Market Configurations
- * Strict prop-driven copy, samples, currency, and SEO definitions for:
+ * Strict prop-driven copy, samples, currency, comparison, and SEO definitions for:
  * - India (/in)
  * - UK / EU (/uk)
  * - US / Global Default (/)
@@ -153,6 +153,12 @@ export const MARKETS = {
       },
     ],
 
+    comparison: {
+      headline: 'How CareerCraft Compares',
+      subhead: 'Why career practitioners choose CareerCraft over expensive agencies or generic AI chatbots.',
+      traditionalLabel: 'Resume Writing Services',
+    },
+
     resumeSection: {
       headline: 'One profile. One consistent career story.',
       subhead: 'Your LinkedIn and resume should reinforce the same narrative. CareerCraft synthesizes both into an ATS-compliant PDF.',
@@ -247,7 +253,7 @@ export const MARKETS = {
     spelling: 'UK',
     currencySymbol: '£',
     currencyCode: 'GBP',
-    price: '199', // Checkout processed via Razorpay
+    price: '199',
     formattedPrice: '£2.99 (₹199)',
     priceDisclaimer: 'One-time payment. No subscription or recurring monthly fees.',
     
@@ -383,6 +389,12 @@ export const MARKETS = {
       },
     ],
 
+    comparison: {
+      headline: 'How CareerCraft Compares',
+      subhead: 'Why job seekers across the UK and Europe choose CareerCraft over expensive CV agencies or generic AI chatbots.',
+      traditionalLabel: 'CV Writing Services',
+    },
+
     resumeSection: {
       headline: 'One profile. One consistent career story.',
       subhead: 'Your LinkedIn and CV should reinforce the same narrative. CareerCraft synthesises both into an ATS-compliant PDF.',
@@ -433,7 +445,7 @@ export const MARKETS = {
       headline: 'Simple, transparent pricing for serious job seekers',
       subhead: 'Pay once, optimise your profile, and export your matching ATS CV.',
       planName: 'Full Career Suite',
-      price: '199', // Checkout source of truth
+      price: '199',
       currency: 'INR',
       displayPrice: '£2.99 / ₹199',
       period: 'one-time',
@@ -619,6 +631,12 @@ export const MARKETS = {
         desc: 'Generates a clean, single-column PDF resume that parses accurately in Applicant Tracking Systems.',
       },
     ],
+
+    comparison: {
+      headline: 'How CareerCraft Compares',
+      subhead: 'Why job seekers choose CareerCraft over traditional agencies or generic AI writing chatbots.',
+      traditionalLabel: 'Resume Writing Services',
+    },
 
     resumeSection: {
       headline: 'One profile. One consistent career story.',
