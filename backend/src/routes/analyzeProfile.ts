@@ -4,6 +4,8 @@ import { validateAndBindKey } from '../lib/validateKey';
 import { checkRateLimit, logUsage } from '../lib/rateLimit';
 import { callLLMJson } from '../lib/llm';
 import { renderResumePdf, TemplateName } from '../lib/pdf';
+import { cleanSource, isProfileUsable } from '../lib/resume/prompt';
+import { generateResumeData } from '../lib/resume/generate';
 
 const VALID_TEMPLATES: TemplateName[] = ['modern', 'classic', 'compact'];
 
@@ -164,29 +166,34 @@ export async function handleAnalyzeProfile(request: Request, env: Env): Promise<
   await logUsage(sql, body.key, 'analyze-profile');
   await sql`INSERT INTO generated_content (key, endpoint, output_json) VALUES (${body.key}, 'analyze-profile', ${JSON.stringify(safeResult)})`;
 
-  // Best-effort resume PDF synthesized from the rewrite
+  // Best-effort resume PDF. Built from the customer's OWN source text through the shared structured,
+  // fact-checked pipeline — deliberately not from the rewrite above, whose prompt encourages adding metrics.
   let resumePdfBase64: string | null = null;
   try {
     const template: TemplateName = VALID_TEMPLATES.includes(body.template as TemplateName)
       ? (body.template as TemplateName)
       : 'modern';
-    const pdfBytes = await renderResumePdf(
-      {
-        name: body.name ?? 'Candidate',
-        headline: safeResult.rewrite.headline || body.headline || '',
-        summary: safeResult.rewrite.about || body.about || '',
-        experience: safeResult.rewrite.experience.length > 0 ? safeResult.rewrite.experience : (body.experience ? [body.experience] : []),
-        education: body.education ? body.education.split('\n').filter(Boolean) : [],
-        skills: safeResult.rewrite.skills.length > 0 ? safeResult.rewrite.skills : (body.skills ? body.skills.split(',').map((s) => s.trim()) : []),
-      },
-      template
-    );
-    let binary = '';
-    const chunkSize = 8192;
-    for (let i = 0; i < pdfBytes.length; i += chunkSize) {
-      binary += String.fromCharCode(...pdfBytes.subarray(i, i + chunkSize));
+    const source = cleanSource({
+      linkedinId: linkedinId ?? '',
+      name: body.name,
+      headline: body.headline,
+      about: body.about,
+      experience: body.experience,
+      education: body.education,
+      skills: body.skills,
+      raw: [body.resumeText, body.rawText].filter(Boolean).join('\n\n'),
+      targetRole: body.targetRole,
+    });
+    const generated = isProfileUsable(source) ? await generateResumeData(env, source) : null;
+    if (generated) {
+      const pdfBytes = await renderResumePdf({ ...generated.result.data, template }, template);
+      let binary = '';
+      const chunkSize = 8192;
+      for (let i = 0; i < pdfBytes.length; i += chunkSize) {
+        binary += String.fromCharCode(...pdfBytes.subarray(i, i + chunkSize));
+      }
+      resumePdfBase64 = btoa(binary);
     }
-    resumePdfBase64 = btoa(binary);
   } catch (err) {
     console.error('[analyze-profile] resume generation failed:', err);
   }

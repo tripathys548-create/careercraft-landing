@@ -20,7 +20,14 @@ function extractJson(raw: string): any {
   return JSON.parse(cleaned);
 }
 
-export async function callLLM(env: Env, systemPrompt: string, userContent: string): Promise<string> {
+export interface LLMOptions {
+  /** Lower = more faithful. Omitted → provider default (existing behaviour). */
+  temperature?: number;
+  /** Gemini structured-output schema. If a model rejects it (HTTP 400) that model is retried without it. */
+  responseSchema?: unknown;
+}
+
+export async function callLLM(env: Env, systemPrompt: string, userContent: string, options?: LLMOptions): Promise<string> {
   const models = [
     'gemini-flash-latest',
     'gemini-3.5-flash',
@@ -32,18 +39,25 @@ export async function callLLM(env: Env, systemPrompt: string, userContent: strin
 
   for (const model of models) {
     try {
-      const resp = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.LLM_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            contents: [{ parts: [{ text: userContent }] }],
-            generationConfig: { responseMimeType: 'application/json' },
-          }),
-        }
-      );
+      const send = (withSchema: boolean) =>
+        fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.LLM_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+              contents: [{ parts: [{ text: userContent }] }],
+              generationConfig: {
+                responseMimeType: 'application/json',
+                ...(options?.temperature !== undefined ? { temperature: options.temperature } : {}),
+                ...(withSchema && options?.responseSchema ? { responseSchema: options.responseSchema } : {}),
+              },
+            }),
+          }
+        );
+      let resp = await send(true);
+      if (resp.status === 400 && options?.responseSchema) resp = await send(false);
 
       if (resp.ok) {
         const data = await resp.json<any>();
@@ -64,19 +78,19 @@ export async function callLLM(env: Env, systemPrompt: string, userContent: strin
   throw lastError || new Error('All LLM models failed');
 }
 
-export async function callLLMJson(env: Env, systemPrompt: string, userContent: string): Promise<any> {
+export async function callLLMJson(env: Env, systemPrompt: string, userContent: string, options?: LLMOptions): Promise<any> {
   const safeContent =
     typeof userContent === 'string' && userContent.length > 15000
       ? userContent.slice(0, 15000)
       : userContent;
 
-  const raw = await callLLM(env, systemPrompt, safeContent);
+  const raw = await callLLM(env, systemPrompt, safeContent, options);
   try {
     return extractJson(raw);
   } catch {
     // Retry once with a stricter prompt
     const stricterPrompt = `${systemPrompt}\n\nYour previous response was not valid JSON. Return ONLY valid JSON, with no surrounding text or markdown fences.`;
-    const retryRaw = await callLLM(env, stricterPrompt, safeContent);
+    const retryRaw = await callLLM(env, stricterPrompt, safeContent, options);
     try {
       return extractJson(retryRaw);
     } catch {

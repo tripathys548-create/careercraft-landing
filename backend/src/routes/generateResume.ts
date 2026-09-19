@@ -2,13 +2,12 @@ import type { Env } from '../lib/db';
 import { getDb } from '../lib/db';
 import { validateAndBindKey } from '../lib/validateKey';
 import { checkRateLimit, logUsage } from '../lib/rateLimit';
-import { callLLMJson } from '../lib/llm';
-import { renderResumePdf, TemplateName } from '../lib/pdf';
+import { renderResumePdf } from '../lib/pdf';
+import { TEMPLATE_NAMES, type PageSize, type TemplateName } from '../lib/resume/types';
+import { cleanSource, isProfileUsable } from '../lib/resume/prompt';
+import { generateResumeData } from '../lib/resume/generate';
 
-const VALID_TEMPLATES: TemplateName[] = ['modern', 'classic', 'compact'];
-
-const SYSTEM_PROMPT = `Structure this LinkedIn profile into resume content.
-Return ONLY JSON matching: {"summary": string, "experience": string[], "education": string[], "skills": string[]}.`;
+const str = (v: unknown): string => (typeof v === 'string' ? v : '');
 
 export async function handleGenerateResume(request: Request, env: Env): Promise<Response> {
   const body = await request.json<{
@@ -21,6 +20,12 @@ export async function handleGenerateResume(request: Request, env: Env): Promise<
     education?: string;
     skills?: string;
     template?: 'classic' | 'modern' | 'compact' | string;
+    // Optional extras — rendered only if supplied and well-formed.
+    email?: string;
+    phone?: string;
+    location?: string;
+    website?: string;
+    pageSize?: 'a4' | 'letter' | string;
   }>();
 
   const sql = getDb(env);
@@ -50,34 +55,66 @@ export async function handleGenerateResume(request: Request, env: Env): Promise<
     });
   }
 
+  // Don't spend the customer's single generation on an empty/failed LinkedIn scrape.
+  const source = cleanSource({
+    linkedinId: str(body.linkedinId),
+    name: str(body.name),
+    headline: str(body.headline),
+    about: str(body.about),
+    experience: str(body.experience),
+    education: str(body.education),
+    skills: str(body.skills),
+  });
+  if (!isProfileUsable(source)) {
+    return jsonResponse(
+      env,
+      {
+        ok: false,
+        code: 'profile_incomplete',
+        error:
+          'We could not read enough of your LinkedIn profile. Open your profile page, scroll to the bottom so every section loads, then try again. Your one-time resume has not been used.',
+      },
+      422
+    );
+  }
+
   const withinLimit = await checkRateLimit(sql, body.key);
   if (!withinLimit) {
     return jsonResponse(env, { ok: false, error: 'rate_limited' }, 429);
   }
 
-  const userContent = `Name: ${body.name}\nHeadline: ${body.headline}\nAbout: ${body.about}\nExperience: ${body.experience}\nEducation: ${body.education}\nSkills: ${body.skills}`;
-  let structured: any;
-  try {
-    structured = await callLLMJson(env, SYSTEM_PROMPT, userContent);
-  } catch {
+  // ── Generate: structured extraction → code-side fact check → (one) corrective retry ──
+  const generated = await generateResumeData(env, source, {
+    email: body.email,
+    phone: body.phone,
+    location: body.location,
+    website: body.website,
+  });
+  if (!generated) {
     return jsonResponse(env, { ok: false, error: 'generation_failed' }, 502);
   }
+  const best = generated.result;
 
-  const template: TemplateName = VALID_TEMPLATES.includes(body.template as TemplateName)
+  const template: TemplateName = (TEMPLATE_NAMES as readonly string[]).includes(str(body.template))
     ? (body.template as TemplateName)
     : 'modern';
-  const pdfBytes = await renderResumePdf(
-    {
-      name: body.name ?? '',
-      headline: body.headline ?? '',
-      summary: structured.summary,
-      experience: structured.experience,
-      education: structured.education,
-      skills: structured.skills,
-      template,
-    },
-    template
-  );
+  const pageSize: PageSize = body.pageSize === 'letter' ? 'letter' : 'a4';
+
+  let pdfBytes: Uint8Array;
+  try {
+    pdfBytes = await renderResumePdf({ ...best.data, template, pageSize }, template);
+  } catch (err) {
+    console.error('[resume] render failed', err instanceof Error ? err.message : err);
+    return jsonResponse(
+      env,
+      {
+        ok: false,
+        code: 'render_failed',
+        error: 'We could not build your resume PDF. Your one-time resume has not been used — please try again.',
+      },
+      500
+    );
+  }
 
   await logUsage(sql, body.key, 'generate-resume');
   await sql`INSERT INTO generated_content (key, endpoint, output_blob) VALUES (${body.key}, 'generate-resume', ${Buffer.from(pdfBytes)})`;
