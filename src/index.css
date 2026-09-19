@@ -1,29 +1,31 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Space Grotesk", var(--font-sans);
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Plus Jakarta Sans", var(--font-sans);
 
-  --color-ink: #111111;
-  --color-ink-muted: #5b5b5b;
-  --color-cream: #faf6ec;
-  --color-surface: #f2ede0;
-  --color-border: #111111;
+  --color-ink: #0B1220;
+  --color-bg: #F7F8FA;
+  --color-surface: #FFFFFF;
+  --color-border: #E4E7EC;
+  
+  --color-accent: #2F5BFF;
+  --color-accent-hover: #1E40AF;
+  --color-accent-soft: #EFF3FF;
+  
+  --color-success: #0F8A5F;
+  --color-warn: #B45309;
+  --color-muted: #5B6472;
 
-  --color-brand: #22c55e;
-  --color-brand-hover: #16a34a;
-  --color-brand-soft: #eafbf0;
-
-  --color-accent-purple: #7c3aed;
-  --color-accent-purple-soft: #f3effe;
-  --color-accent-blue: #2563eb;
-  --color-accent-green: #16a34a;
-  --color-accent-yellow: #f5b800;
-  --color-accent-pink: #f43f5e;
+  --color-brand: #2F5BFF;
+  --color-brand-hover: #1E40AF;
+  --color-brand-soft: #EFF3FF;
 }
 
 html {
   scroll-behavior: smooth;
+  background-color: #F7F8FA;
+  color: #0B1220;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -34,37 +36,50 @@ html {
 
 body {
   margin: 0;
-  background: var(--color-cream);
+  background-color: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.font-display {
-  font-family: var(--font-display);
+/* Tabular numerals for stable scoring UI */
+.tabular-nums,
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0) rotate(var(--tw-rotate, 0deg)); }
-  50% { transform: translateY(-8px) rotate(var(--tw-rotate, 0deg)); }
+/* Accessible Skip Link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 10px;
+  background: var(--color-accent);
+  color: #ffffff;
+  padding: 8px 14px;
+  font-weight: 700;
+  z-index: 100;
+  border-radius: 6px;
+  transition: top 0.15s ease-out;
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+.skip-link:focus {
+  top: 10px;
 }
 
-@keyframes reveal-in {
-  from { opacity: 0; transform: translateY(8px); }
+/* Safe animations honoring prefers-reduced-motion */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.reveal-in {
-  animation: reveal-in 0.35s ease-out;
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-float,
-  .reveal-in {
+  .animate-fade-in {
     animation: none;
   }
 }

@@ -1,24 +1,42 @@
-import { ArrowRight } from "lucide-react";
+import Container from "./ui/Container";
+import Button from "./ui/Button";
+import { ArrowRight, ShieldCheck } from "lucide-react";
+import { analytics } from "../lib/analytics";
 
-export default function FinalCTA() {
+export default function FinalCTA({ marketConfig }) {
+  const { finalCta } = marketConfig;
+
   return (
-    <section className="border-t-2 border-ink">
-      <div className="mx-auto max-w-2xl px-5 py-24 text-center">
-        <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-          Your next opportunity starts with a better profile.
-        </h2>
-        <p className="mt-4 text-base text-ink-muted">
-          Rewrite your LinkedIn in an afternoon and get a matching resume
-          out of it.
-        </p>
-        <a
-          href="#pricing"
-          className="mt-8 inline-flex items-center gap-2 rounded-lg border-2 border-ink bg-brand px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-ink shadow-[4px_4px_0_#111111] transition-transform hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#111111]"
-        >
-          Optimize My LinkedIn
-          <ArrowRight size={16} />
-        </a>
-      </div>
+    <section id="final-cta" className="py-16 sm:py-24 bg-ink text-white relative overflow-hidden">
+      <Container size="small">
+        <div className="text-center space-y-5">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+            {finalCta.headline}
+          </h2>
+
+          <p className="text-base sm:text-lg text-white/70 max-w-xl mx-auto">
+            {finalCta.subhead}
+          </p>
+
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Button
+              variant="primary"
+              size="lg"
+              href="#free-score-tool"
+              onClick={() => analytics.ctaClick("final_cta_free_score", "final_cta")}
+              className="w-full sm:w-auto gap-2 text-sm sm:text-base bg-accent hover:bg-accent-hover text-white shadow-md"
+            >
+              <span>{finalCta.cta}</span>
+              <ArrowRight size={16} />
+            </Button>
+          </div>
+
+          <p className="pt-2 text-xs text-white/60 flex items-center justify-center gap-1.5">
+            <ShieldCheck size={14} className="text-success" />
+            <span>One-time upgrade available • Profile data is processed securely and never sold</span>
+          </p>
+        </div>
+      </Container>
     </section>
   );
 }

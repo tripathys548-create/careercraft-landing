@@ -1,116 +1,120 @@
 import { useState } from "react";
-import { Menu, X, Headphones, Shield } from "lucide-react";
 import Logo from "./Logo";
+import Button from "./ui/Button";
+import { Menu, X, ArrowRight, Shield, Headphones } from "lucide-react";
+import { analytics } from "../lib/analytics";
 
-const NAV_LINKS = [
-  { label: "See Demo", href: "#demo" },
+const NAV_ITEMS = [
   { label: "Features", href: "#features" },
-  { label: "Templates", href: "#templates" },
+  { label: "How It Works", href: "#how-it-works" },
   { label: "Pricing", href: "#pricing" },
-  { label: "Optimize", href: "#optimize" },
+  { label: "FAQ", href: "#faq" },
 ];
 
-export default function Header({ onOpenSupport, onOpenAdmin }) {
-  const [open, setOpen] = useState(false);
+export default function Header({ onOpenSupport, onOpenAdmin, marketConfig }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-ink bg-cream/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
-        <Logo />
-
-        <nav className="hidden items-center gap-6 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-sm font-semibold text-ink-muted transition-colors hover:text-ink"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-
-        <div className="hidden items-center gap-3 sm:flex">
-          <button
-            type="button"
-            onClick={onOpenSupport}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-ink-muted hover:text-ink px-2 py-1.5 rounded transition-colors"
-          >
-            <Headphones size={15} />
-            Help &amp; Support
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenAdmin}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-ink-muted hover:text-ink px-2 py-1.5 rounded transition-colors"
-            title="Admin Login for Support.websitecreation@gmail.com"
-          >
-            <Shield size={14} />
-            Admin
-          </button>
-
-          <a
-            href="#pricing"
-            className="rounded-lg border-2 border-ink bg-brand px-4 py-2 text-xs sm:text-sm font-bold text-ink shadow-[3px_3px_0_#111111] transition-transform hover:-translate-y-0.5"
-          >
-            Get Started
-          </a>
+    <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur border-b border-border transition-colors">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
+        <div className="flex items-center gap-8">
+          <Logo />
+          <nav className="hidden md:flex items-center gap-6" aria-label="Main Navigation">
+            {NAV_ITEMS.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                onClick={() => analytics.ctaClick(`nav_${item.label.toLowerCase().replace(/\s+/g, '_')}`, 'header')}
+                className="text-sm font-semibold text-muted hover:text-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-md px-1.5 py-1"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
         </div>
 
+        <div className="hidden sm:flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              analytics.ctaClick("support_modal_trigger", "header");
+              if (onOpenSupport) onOpenSupport();
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-ink px-2.5 py-1.5 rounded-lg hover:bg-bg transition-colors"
+          >
+            <Headphones size={15} />
+            Support
+          </button>
+
+          <Button
+            variant="primary"
+            size="sm"
+            href="#pricing"
+            onClick={() => analytics.ctaClick("header_get_started", "header")}
+            className="gap-1.5"
+          >
+            <span>Get Started</span>
+            <ArrowRight size={14} />
+          </Button>
+        </div>
+
+        {/* Mobile menu toggle */}
         <button
           type="button"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-          className="flex h-9 w-9 items-center justify-center rounded-md text-ink sm:hidden"
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((prev) => !prev)}
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-ink md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          {open ? <X size={22} /> : <Menu size={22} />}
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
-      {open && (
-        <nav className="border-t-2 border-ink px-5 py-4 sm:hidden bg-surface">
-          <ul className="flex flex-col gap-3">
-            {NAV_LINKS.map((link) => (
-              <li key={link.label}>
+      {/* Mobile nav dropdown */}
+      {mobileMenuOpen && (
+        <nav
+          className="border-b border-border bg-surface px-4 py-4 md:hidden shadow-lg"
+          aria-label="Mobile Navigation"
+        >
+          <ul className="flex flex-col gap-2">
+            {NAV_ITEMS.map((item) => (
+              <li key={item.label}>
                 <a
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="block text-sm font-bold text-ink"
+                  href={item.href}
+                  onClick={() => {
+                    analytics.ctaClick(`mobile_nav_${item.label.toLowerCase()}`, 'header');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="block rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-bg"
                 >
-                  {link.label}
+                  {item.label}
                 </a>
               </li>
             ))}
-            <li className="flex flex-col gap-2 pt-2 border-t border-ink/10">
+            <li className="pt-2 border-t border-border mt-1 flex flex-col gap-2">
               <button
                 type="button"
                 onClick={() => {
-                  setOpen(false);
-                  onOpenSupport();
+                  setMobileMenuOpen(false);
+                  if (onOpenSupport) onOpenSupport();
                 }}
-                className="flex items-center gap-2 text-xs font-bold text-ink py-1.5"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-muted hover:text-ink"
               >
-                <Headphones size={15} /> Help &amp; Support
+                <Headphones size={16} /> Contact Support
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  onOpenAdmin();
-                }}
-                className="flex items-center gap-2 text-xs font-bold text-ink py-1.5"
-              >
-                <Shield size={15} /> Admin Portal
-              </button>
-              <a
+              <Button
+                variant="primary"
+                size="md"
                 href="#pricing"
-                onClick={() => setOpen(false)}
-                className="mt-2 rounded-lg border-2 border-ink bg-brand px-4 py-2 text-center text-xs font-bold text-ink shadow-[3px_3px_0_#111111]"
+                onClick={() => {
+                  analytics.ctaClick("mobile_header_get_started", "header");
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full justify-center gap-2 mt-1"
               >
-                Get Started
-              </a>
+                <span>Get Started</span>
+                <ArrowRight size={14} />
+              </Button>
             </li>
           </ul>
         </nav>
