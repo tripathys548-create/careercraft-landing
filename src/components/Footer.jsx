@@ -1,18 +1,21 @@
 import Container from "./ui/Container";
 import Logo from "./Logo";
-import { Mail, Headphones, ShieldCheck, Shield } from "lucide-react";
+import MarketSwitcher from "./ui/MarketSwitcher";
+import { Mail, Headphones, Shield } from "lucide-react";
 import { analytics } from "../lib/analytics";
 
 const COMPANY_EMAIL = "Support.websitecreation@gmail.com";
 
-export default function Footer({ onOpenSupport, onOpenAdmin, marketConfig }) {
+export default function Footer({ onOpenSupport, onOpenAdmin, marketConfig, currentMarket, onSwitchMarket }) {
   return (
     <footer className="border-t border-border bg-surface py-12 text-xs text-muted">
       <Container size="default">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-border">
           <Logo showTagline />
 
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <MarketSwitcher currentMarket={currentMarket} onSwitch={onSwitchMarket} />
+            <div className="h-4 w-px bg-border hidden sm:block" />
             <button
               type="button"
               onClick={() => {
