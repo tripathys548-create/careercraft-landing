@@ -1,7 +1,24 @@
-export type TemplateName = 'modern' | 'classic' | 'compact';
+export type TemplateName =
+  | 'modern'
+  | 'classic'
+  | 'compact'
+  | 'executive'
+  | 'finance'
+  | 'tech'
+  | 'minimal'
+  | 'nordic';
 export type PageSize = 'a4' | 'letter';
 
-export const TEMPLATE_NAMES: readonly TemplateName[] = ['modern', 'classic', 'compact'];
+export const TEMPLATE_NAMES: readonly TemplateName[] = [
+  'modern',
+  'classic',
+  'compact',
+  'executive',
+  'finance',
+  'tech',
+  'minimal',
+  'nordic',
+];
 
 export interface ResumeContact {
   email?: string;

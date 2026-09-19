@@ -4,10 +4,11 @@ import { validateAndBindKey } from '../lib/validateKey';
 import { checkRateLimit, logUsage } from '../lib/rateLimit';
 import { callLLMJson } from '../lib/llm';
 import { renderResumePdf, TemplateName } from '../lib/pdf';
+import { TEMPLATE_NAMES } from '../lib/resume/types';
 import { cleanSource, isProfileUsable } from '../lib/resume/prompt';
 import { generateResumeData } from '../lib/resume/generate';
 
-const VALID_TEMPLATES: TemplateName[] = ['modern', 'classic', 'compact'];
+const VALID_TEMPLATES: readonly TemplateName[] = TEMPLATE_NAMES;
 
 const SYSTEM_PROMPT = `You are an elite Executive Career Strategist and ATS Resume & LinkedIn Optimization Architect.
 

@@ -4,9 +4,9 @@ import fontkit from '@pdf-lib/fontkit';
 import { renderResumePdf, renderResumePdfWithInfo, wrapText } from '../../src/lib/pdf';
 import { fontBytes } from '../../src/lib/resume/fonts';
 import { ALL_SAMPLES, midLevel } from '../fixtures/resumeSamples';
-import type { ResumeData, TemplateName } from '../../src/lib/resume/types';
+import { TEMPLATE_NAMES, type ResumeData, type TemplateName } from '../../src/lib/resume/types';
 
-const TEMPLATES: TemplateName[] = ['modern', 'classic', 'compact'];
+const TEMPLATES: readonly TemplateName[] = TEMPLATE_NAMES;
 const A4: [number, number] = [595.28, 841.89];
 
 const header = (b: Uint8Array) => new TextDecoder().decode(b.slice(0, 5));

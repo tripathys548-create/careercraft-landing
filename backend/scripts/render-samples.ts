@@ -4,14 +4,15 @@
  *   npm run resume:samples
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { renderResumePdfWithInfo } from '../src/lib/pdf';
 import { ALL_SAMPLES } from '../test/fixtures/resumeSamples';
-import type { TemplateName } from '../src/lib/resume/types';
+import { TEMPLATE_NAMES } from '../src/lib/resume/types';
 
-const out = new URL('../.samples/', import.meta.url).pathname;
+const out = fileURLToPath(new URL('../.samples/', import.meta.url));
 mkdirSync(out, { recursive: true });
 for (const [name, data] of Object.entries(ALL_SAMPLES)) {
-  for (const t of ['modern', 'classic', 'compact'] as TemplateName[]) {
+  for (const t of TEMPLATE_NAMES) {
     const t0 = performance.now();
     const info = await renderResumePdfWithInfo({ ...data, template: t }, t);
     writeFileSync(`${out}${name}-${t}.pdf`, info.bytes);

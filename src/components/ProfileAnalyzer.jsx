@@ -39,9 +39,14 @@ const BACKEND_URL =
   "https://careercraft-backend.careercraft-backend.workers.dev";
 
 const TEMPLATES = [
-  { id: "modern", label: "Modern Executive", description: "Royal Sapphire & Teal ribbons, rounded skill badges." },
-  { id: "classic", label: "Classic Corporate", description: "Navy & Slate, structured executive borders." },
-  { id: "compact", label: "High-Density Compact", description: "Space-optimized single-page layout for experienced leaders." },
+  { id: "modern", label: "Modern Minimal", tag: "Popular", category: "Tech & Product", color: "bg-blue-600", description: "Royal sapphire accents, clean sans-serif with skills-first hierarchy." },
+  { id: "executive", label: "Executive Leadership", tag: "Leadership", category: "Management", color: "bg-emerald-600", description: "Hunter emerald accents, experience-first order, distinguished executive flow." },
+  { id: "classic", label: "Classic Corporate", tag: "Traditional", category: "Consulting & Law", color: "bg-rose-800", description: "Burgundy serif typography, centered header, prestigious traditional structure." },
+  { id: "finance", label: "Wall Street Finance", tag: "Banking", category: "Investment Banking", color: "bg-slate-900", description: "Oxford navy serif, conservative spacing, audit-grade financial layout." },
+  { id: "tech", label: "Tech & Engineering", tag: "Dev & Data", category: "Software & DevOps", color: "bg-indigo-600", description: "Electric indigo accents, prominent skills grid, engineering-focused." },
+  { id: "compact", label: "High-Density Compact", tag: "1-Page Fit", category: "Senior 10+ Yrs", color: "bg-sky-600", description: "Space-optimized tight vertical rhythm for extensive multi-role histories." },
+  { id: "nordic", label: "Nordic Clean", tag: "Modern", category: "Operations & HR", color: "bg-teal-600", description: "Scandinavian slate teal, generous breathing room, editorial typography." },
+  { id: "minimal", label: "Minimal Charcoal", tag: "Monochrome", category: "Clean Minimalist", color: "bg-zinc-700", description: "Refined charcoal monochrome with high-contrast subtle dividers." },
 ];
 
 function scoreColor(score) {
@@ -439,23 +444,44 @@ export default function ProfileAnalyzer() {
 
             {/* Step 4: Resume Template Selection */}
             <div className="mt-6">
-              <label className="block text-xs font-bold uppercase tracking-wide text-ink-muted">
-                Executive Resume Design Palette
-              </label>
-              <div className="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wide text-ink-muted">
+                  Choose Resume Template (8 Professional Layouts)
+                </label>
+                <span className="text-[11px] font-semibold text-accent-blue bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                  100% ATS Compliant
+                </span>
+              </div>
+              <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
                 {TEMPLATES.map((t) => (
                   <button
                     key={t.id}
                     type="button"
                     onClick={() => setTemplate(t.id)}
-                    className={`rounded-xl border-2 border-ink p-3 text-left transition-all ${
+                    className={`relative rounded-xl border-2 border-ink p-3 text-left transition-all flex flex-col justify-between ${
                       template === t.id
-                        ? "bg-brand text-ink shadow-[3px_3px_0_#111111]"
-                        : "bg-surface text-ink-muted hover:text-ink"
+                        ? "bg-brand text-ink shadow-[3px_3px_0_#111111] ring-2 ring-ink"
+                        : "bg-surface text-ink-muted hover:text-ink hover:bg-white"
                     }`}
                   >
-                    <p className="font-bold text-xs">{t.label}</p>
-                    <p className="mt-1 text-[11px] leading-tight text-ink/70">{t.description}</p>
+                    <div>
+                      <div className="flex items-center justify-between gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`h-2.5 w-2.5 rounded-full ${t.color}`} />
+                          <p className="font-bold text-xs leading-tight">{t.label}</p>
+                        </div>
+                        <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-ink/10 text-ink">
+                          {t.tag}
+                        </span>
+                      </div>
+                      <p className="mt-1.5 text-[10.5px] leading-snug text-ink/75">{t.description}</p>
+                    </div>
+                    <div className="mt-2 pt-1.5 border-t border-ink/10 flex items-center justify-between text-[10px] font-medium text-ink-muted">
+                      <span>{t.category}</span>
+                      {template === t.id && (
+                        <span className="font-bold text-ink flex items-center gap-1">✓ Active</span>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
