@@ -1,69 +1,46 @@
-import { FileText, Link2, ListChecks, Target, Gauge, Sparkles } from "lucide-react";
+import Section from "./ui/Section";
+import Container from "./ui/Container";
+import Card from "./ui/Card";
+import { Gauge, Sparkles, FileText, Target, ListChecks, Link2 } from "lucide-react";
 
-const FEATURES = [
-  {
-    icon: Link2,
-    title: "Headline built for recruiter search",
-    description:
-      "Your headline is the line recruiters search against. We rewrite it around the skills and roles you actually want, not just your job title.",
-  },
-  {
-    icon: Sparkles,
-    title: "An About section people finish reading",
-    description:
-      "A clear three-part narrative — what you do, what you've shipped, and what you're looking for — instead of a blank box or three generic lines.",
-  },
-  {
-    icon: ListChecks,
-    title: "Experience and skills, reordered",
-    description:
-      "Experience bullets rewritten to lead with an action and a result, and skills reordered so the ones that matter for your target role sit at the top.",
-  },
-  {
-    icon: Gauge,
-    title: "Profile score",
-    description:
-      "See exactly where your profile is weak across headline, About, experience, skills and keyword coverage — then fix it section by section.",
-  },
-  {
-    icon: Target,
-    title: "Tailored to the job you want",
-    description:
-      "Paste a job description and get the keywords and skills that posting expects, mapped onto both your profile and your resume.",
-  },
-  {
-    icon: FileText,
-    title: "A matching ATS-friendly resume",
-    description:
-      "Generate a resume from the same optimized profile, structured to parse cleanly in Applicant Tracking Systems — plus cover letters when you need them.",
-  },
-];
+export default function Features({ marketConfig }) {
+  const { features } = marketConfig;
+  const icons = [Gauge, Link2, Sparkles, ListChecks, Target, FileText];
 
-export default function Features() {
   return (
-    <section id="features" className="border-t-2 border-ink bg-surface">
-      <div className="mx-auto max-w-6xl px-5 py-20">
-        <h2 className="font-display text-center text-2xl font-bold text-ink sm:text-3xl">
-          Everything your LinkedIn profile is missing
-        </h2>
-
-        <div className="mt-12 grid gap-5 sm:grid-cols-2">
-          {FEATURES.map((feature) => (
-            <div
-              key={feature.title}
-              className="rounded-xl border-2 border-ink bg-white p-6 shadow-[4px_4px_0_#111111] transition-transform duration-150 hover:-translate-y-1"
-            >
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg border-2 border-ink bg-brand-soft text-brand-hover">
-                <feature.icon size={20} />
-              </div>
-              <h3 className="text-base font-semibold text-ink">{feature.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-                {feature.description}
-              </p>
-            </div>
-          ))}
+    <Section id="features" background="surface" className="scroll-mt-16 border-b border-border">
+      <Container size="default">
+        <div className="text-center max-w-2xl mx-auto">
+          <span className="text-xs font-bold uppercase tracking-wider text-accent">
+            Precision Feature Set
+          </span>
+          <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-ink">
+            Everything Your Profile &amp; Resume Need to Convert
+          </h2>
+          <p className="mt-2 text-sm text-muted">
+            Engineered around how recruiter search algorithms index profiles and how ATS systems parse resumes.
+          </p>
         </div>
-      </div>
-    </section>
+
+        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feat, idx) => {
+            const Icon = icons[idx] || Sparkles;
+            return (
+              <Card key={idx} padding="md" className="border-border bg-bg/50 hover:bg-surface transition-all shadow-2xs hover:shadow-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 text-accent font-bold">
+                  <Icon size={20} />
+                </div>
+                <h3 className="mt-4 text-base font-bold text-ink">
+                  {feat.title}
+                </h3>
+                <p className="mt-2 text-xs sm:text-sm text-muted leading-relaxed">
+                  {feat.desc}
+                </p>
+              </Card>
+            );
+          })}
+        </div>
+      </Container>
+    </Section>
   );
 }
