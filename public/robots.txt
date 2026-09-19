@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://careercraftt.webelvate.com/sitemap.xml
+Sitemap: https://careercraft.webelvate.com/sitemap.xml
